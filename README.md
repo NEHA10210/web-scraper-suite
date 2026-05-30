@@ -23,11 +23,11 @@
 
 | Landing Page | Dashboard |
 |-------------|-----------|
-| ![landing](screenshots/landing.png) | ![dashboard](screenshots/dashboard.png) |
+| ![landing](screenshots/Landing.png) | ![dashboard](screenshots/Dashboard.png) |
 
 | SEO Analyzer | Price Tracker |
 |-------------|--------------|
-| ![seo](screenshots/seo.png) | ![price](screenshots/price.png) |
+| ![seo](screenshots/SEO.png) | ![price](screenshots/Price.png) |
 
 ---
 
