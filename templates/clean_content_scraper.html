@@ -1,0 +1,769 @@
+{% extends "base.html" %}
+
+{% block title %}Clean Content Scraper - Professional Extraction{% endblock %}
+
+{% block extra_css %}
+<style>
+.clean-scraper-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.extraction-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.progress-section {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 0.75rem;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.results-section {
+    display: none;
+}
+
+.content-display {
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-header {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.content-body {
+    padding: 2rem;
+}
+
+.title-display {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.heading-display {
+    margin: 2rem 0 1rem 0;
+    padding: 1rem;
+    background: #f1f5f9;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0.5rem;
+}
+
+.heading-display h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.heading-display h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.paragraph-display {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: #fafafa;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    line-height: 1.7;
+    font-size: 1rem;
+    color: #374151;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.export-button {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.export-button.success {
+    background: #10b981;
+}
+
+.export-button.success:hover {
+    background: #059669;
+}
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.quality-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quality-excellent {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.quality-good {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.quality-fair {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.quality-poor {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.url-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.url-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.scrape-button {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scrape-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.scrape-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.option-card {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.option-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.option-card label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0;
+    cursor: pointer;
+}
+
+.option-card input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #3b82f6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.empty-state svg {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem auto;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    .clean-scraper-container {
+        padding: 1rem;
+    }
+    
+    .hero-section {
+        padding: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .export-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="clean-scraper-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="text-4xl font-bold mb-4">Clean Content Scraper</h1>
+        <p class="text-xl opacity-90 mb-6">Professional content extraction using Readability algorithm</p>
+        <div class="quality-indicator quality-excellent">Production Ready</div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="extraction-section">
+        <h2 class="text-2xl font-bold mb-6">Extract Clean Content</h2>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Enter URL to Extract Content</label>
+            <input type="url" id="urlInput" class="url-input" placeholder="https://example.com/article" />
+        </div>
+
+        <div class="options-grid">
+            <div class="option-card">
+                <h4>Scraping Options</h4>
+                <label>
+                    <input type="checkbox" id="enableJavaScript" checked>
+                    <span>Enable JavaScript</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="enableScroll" checked>
+                    <span>Scroll for Content</span>
+                </label>
+            </div>
+            
+            <div class="option-card">
+                <h4>Extraction Method</h4>
+                <label>
+                    <input type="checkbox" id="useReadability" checked>
+                    <span>Readability Algorithm</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="useNewspaper" checked>
+                    <span>Newspaper3k Fallback</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <button onclick="startExtraction()" id="extractButton" class="scrape-button">
+                <i class="fas fa-file-alt"></i>
+                Extract Clean Content
+            </button>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="progress-section">
+        <h3 class="text-lg font-semibold mb-4">Extracting Content...</h3>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p id="progressText" class="text-center text-gray-600">Initializing...</p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="results-section">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="paragraphsCount">0</div>
+                <div class="stat-label">Paragraphs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="headingsCount">0</div>
+                <div class="stat-label">Headings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="wordsCount">0</div>
+                <div class="stat-label">Total Words</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="readingTime">0</div>
+                <div class="stat-label">Reading Time</div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="export-buttons">
+            <button onclick="exportJSON()" class="export-button">
+                <i class="fas fa-code"></i> Export JSON
+            </button>
+            <button onclick="exportMarkdown()" class="export-button">
+                <i class="fas fa-markdown"></i> Export Markdown
+            </button>
+            <button onclick="copyContent()" class="export-button success">
+                <i class="fas fa-copy"></i> Copy Content
+            </button>
+        </div>
+
+        <!-- Content Display -->
+        <div class="content-display">
+            <div class="content-header">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Extracted Content</h3>
+                    <div id="qualityIndicator" class="quality-indicator quality-excellent">Clean Content</div>
+                </div>
+            </div>
+            <div class="content-body" id="contentDisplay">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let extractedData = null;
+
+// Main extraction function
+async function startExtraction() {
+    const url = document.getElementById('urlInput').value.trim();
+    
+    if (!url) {
+        showMessage('Please enter a URL to extract content from', 'error');
+        return;
+    }
+    
+    // Clear previous results
+    clearResults();
+    clearMessages();
+    
+    // Show progress
+    showProgress();
+    
+    // Build configuration
+    const config = {
+        javascript: document.getElementById('enableJavaScript').checked,
+        scroll: document.getElementById('enableScroll').checked,
+        useReadability: document.getElementById('useReadability').checked,
+        useNewspaper: document.getElementById('useNewspaper').checked
+    };
+    
+    try {
+        updateProgress(25, 'Fetching webpage...');
+        
+        const response = await fetch('/api/v1/clean-content-scraper', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url, config })
+        });
+        
+        updateProgress(50, 'Processing content...');
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateProgress(75, 'Extracting clean content...');
+            extractedData = result;
+            
+            updateProgress(100, 'Complete!');
+            
+            setTimeout(() => {
+                hideProgress();
+                displayResults();
+                showMessage('Content extracted successfully!', 'success');
+            }, 500);
+            
+        } else {
+            hideProgress();
+            clearResults();
+            showMessage('Extraction failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+        
+    } catch (error) {
+        hideProgress();
+        clearResults();
+        showMessage('Network error: ' + error.message, 'error');
+    }
+}
+
+// Clear all results
+function clearResults() {
+    extractedData = null;
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('contentDisplay').innerHTML = '';
+    
+    // Reset stats
+    document.getElementById('paragraphsCount').textContent = '0';
+    document.getElementById('headingsCount').textContent = '0';
+    document.getElementById('wordsCount').textContent = '0';
+    document.getElementById('readingTime').textContent = '0';
+}
+
+// Clear messages
+function clearMessages() {
+    const messages = document.querySelectorAll('.error-message, .success-message');
+    messages.forEach(msg => msg.remove());
+}
+
+// Show message
+function showMessage(text, type) {
+    clearMessages();
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `${type}-message fixed top-4 right-4 z-50 max-w-md`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'} mr-2"></i>
+        ${text}
+    `;
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
+}
+
+// Progress functions
+function showProgress() {
+    document.getElementById('progressSection').style.display = 'block';
+    document.getElementById('extractButton').disabled = true;
+    document.getElementById('extractButton').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Extracting...';
+}
+
+function hideProgress() {
+    document.getElementById('progressSection').style.display = 'none';
+    document.getElementById('extractButton').disabled = false;
+    document.getElementById('extractButton').innerHTML = '<i class="fas fa-file-alt mr-2"></i>Extract Clean Content';
+}
+
+function updateProgress(percent, text) {
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressText').textContent = text;
+}
+
+// Display results
+function displayResults() {
+    if (!extractedData) return;
+    
+    // Update stats
+    const stats = extractedData.statistics || {};
+    document.getElementById('paragraphsCount').textContent = stats.paragraphs_count || 0;
+    document.getElementById('headingsCount').textContent = stats.headings_count || 0;
+    document.getElementById('wordsCount').textContent = stats.total_words || 0;
+    document.getElementById('readingTime').textContent = (stats.estimated_reading_time || 0) + ' min';
+    
+    // Display content
+    displayContent();
+    
+    // Show results section
+    document.getElementById('resultsSection').style.display = 'block';
+    
+    // Update quality indicator
+    updateQualityIndicator();
+    
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Display content
+function displayContent() {
+    const contentDisplay = document.getElementById('contentDisplay');
+    let html = '';
+    
+    // Add title
+    if (extractedData.title) {
+        html += `<div class="title-display">${escapeHtml(extractedData.title)}</div>`;
+    }
+    
+    // Add headings and paragraphs in order
+    const headings = extractedData.headings || [];
+    const paragraphs = extractedData.paragraphs || [];
+    
+    // Simple approach: display headings first, then paragraphs
+    if (headings.length > 0) {
+        html += '<div class="mt-6">';
+        headings.forEach(heading => {
+            html += `<div class="heading-display"><h3>${escapeHtml(heading)}</h3></div>`;
+        });
+        html += '</div>';
+    }
+    
+    if (paragraphs.length > 0) {
+        html += '<div class="mt-6">';
+        paragraphs.forEach((paragraph, index) => {
+            html += `
+                <div class="paragraph-display">
+                    <div class="text-sm text-gray-500 mb-2">Paragraph ${index + 1}</div>
+                    <div>${escapeHtml(paragraph)}</div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    if (!html) {
+        html = `
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No content found</h3>
+                <p class="text-gray-500">The page may not have extractable content or the extraction failed.</p>
+            </div>
+        `;
+    }
+    
+    contentDisplay.innerHTML = html;
+}
+
+// Update quality indicator
+function updateQualityIndicator() {
+    const indicator = document.getElementById('qualityIndicator');
+    const stats = extractedData.statistics || {};
+    
+    const paragraphCount = stats.paragraphs_count || 0;
+    const wordCount = stats.total_words || 0;
+    
+    let quality = 'poor';
+    let qualityClass = 'quality-poor';
+    
+    if (paragraphCount >= 5 && wordCount >= 200) {
+        quality = 'excellent';
+        qualityClass = 'quality-excellent';
+    } else if (paragraphCount >= 3 && wordCount >= 100) {
+        quality = 'good';
+        qualityClass = 'quality-good';
+    } else if (paragraphCount >= 1 && wordCount >= 50) {
+        quality = 'fair';
+        qualityClass = 'quality-fair';
+    }
+    
+    indicator.textContent = quality.charAt(0).toUpperCase() + quality.slice(1) + ' Content';
+    indicator.className = `quality-indicator ${qualityClass}`;
+}
+
+// Export functions
+function exportJSON() {
+    if (!extractedData) {
+        showMessage('No data to export', 'error');
+        return;
+    }
+    
+    const data = {
+        title: extractedData.title,
+        headings: extractedData.headings,
+        paragraphs: extractedData.paragraphs,
+        statistics: extractedData.statistics,
+        url: extractedData.url
+    };
+    
+    downloadFile(JSON.stringify(data, null, 2), 'extracted_content.json', 'application/json');
+    showMessage('Content exported as JSON', 'success');
+}
+
+function exportMarkdown() {
+    if (!extractedData) {
+        showMessage('No data to export', 'error');
+        return;
+    }
+    
+    let markdown = '';
+    
+    if (extractedData.title) {
+        markdown += `# ${extractedData.title}\n\n`;
+    }
+    
+    if (extractedData.headings && extractedData.headings.length > 0) {
+        markdown += '## Headings\n\n';
+        extractedData.headings.forEach(heading => {
+            markdown += `### ${heading}\n\n`;
+        });
+    }
+    
+    if (extractedData.paragraphs && extractedData.paragraphs.length > 0) {
+        markdown += '## Content\n\n';
+        extractedData.paragraphs.forEach(paragraph => {
+            markdown += `${paragraph}\n\n`;
+        });
+    }
+    
+    downloadFile(markdown, 'extracted_content.md', 'text/markdown');
+    showMessage('Content exported as Markdown', 'success');
+}
+
+function copyContent() {
+    if (!extractedData) {
+        showMessage('No data to copy', 'error');
+        return;
+    }
+    
+    let text = '';
+    
+    if (extractedData.title) {
+        text += `${extractedData.title}\n\n`;
+    }
+    
+    if (extractedData.paragraphs && extractedData.paragraphs.length > 0) {
+        text += extractedData.paragraphs.join('\n\n');
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showMessage('Content copied to clipboard!', 'success');
+    }).catch(() => {
+        showMessage('Failed to copy to clipboard', 'error');
+    });
+}
+
+// Utility functions
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

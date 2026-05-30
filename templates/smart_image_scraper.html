@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Image Scraper - Extract Relevant Images Only{% endblock %}
+
+{% block extra_css %}
+<style>
+.smart-image-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.input-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.url-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.url-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.scrape-button {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scrape-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.progress-section {
+    background: #f9fafb;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 1rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed 0%, #a855f7 100%);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.results-section {
+    display: none;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.toggle-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+}
+
+.toggle-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #64748b;
+}
+
+.toggle-button.active {
+    background: white;
+    color: #7c3aed;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.image-card {
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+    position: relative;
+    padding-top: 75%; /* 4:3 aspect ratio */
+    background: #f3f4f6;
+}
+
+.image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-info {
+    padding: 1rem;
+}
+
+.image-url {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+    word-break: break-all;
+}
+
+.image-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #64748b;
+}
+
+.main-image-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #dc2626;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    z-index: 10;
+}
+
+.lazy-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.container-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.container-badge.content {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.container-badge.ui {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.container-badge.unknown {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.no-images {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.no-images i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="smart-image-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="text-4xl font-bold mb-4">Smart Image Scraper</h1>
+        <p class="text-xl opacity-90">Extract only relevant images - no icons, no ads, no noise</p>
+        <div class="mt-6 flex justify-center gap-4 text-sm">
+            <span><i class="fas fa-check-circle mr-1"></i> Filters out icons & logos</span>
+            <span><i class="fas fa-check-circle mr-1"></i> Removes tracking pixels</span>
+            <span><i class="fas fa-check-circle mr-1"></i> Prioritizes content images</span>
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="input-section">
+        <h2 class="text-2xl font-bold mb-6">Extract Images</h2>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Enter URL to Extract Images</label>
+            <input type="url" id="urlInput" class="url-input" placeholder="https://example.com" />
+        </div>
+
+        <button onclick="startExtraction()" id="extractButton" class="scrape-button">
+            <i class="fas fa-images"></i> Extract Images
+        </button>
+    </div>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="progress-section">
+        <h3 class="text-lg font-semibold mb-4">Extracting Images...</h3>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p id="progressText" class="text-center text-gray-600">Initializing...</p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="results-section">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalFound">0</div>
+                <div class="stat-label">Total Found</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="filteredCount">0</div>
+                <div class="stat-label">Filtered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="contentImages">0</div>
+                <div class="stat-label">Content Images</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lazyImages">0</div>
+                <div class="stat-label">Lazy Loaded</div>
+            </div>
+        </div>
+
+        <!-- Toggle Section -->
+        <div class="toggle-section">
+            <h3 class="text-lg font-semibold mb-4">View Images</h3>
+            <div class="toggle-buttons">
+                <button class="toggle-button active" onclick="showTopImages()">
+                    <i class="fas fa-star mr-2"></i>Top Images
+                </button>
+                <button class="toggle-button" onclick="showAllImages()">
+                    <i class="fas fa-images mr-2"></i>All Images
+                </button>
+            </div>
+        </div>
+
+        <!-- Images Display -->
+        <div id="imagesDisplay">
+            <div class="images-grid" id="topImages">
+                <!-- Top images will be inserted here -->
+            </div>
+            <div class="images-grid" id="allImages" style="display: none;">
+                <!-- All images will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let extractedData = null;
+let currentView = 'filtered';
+
+async function startExtraction() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) {
+        showMessage('Please enter a URL', 'error');
+        return;
+    }
+    
+    // Clear everything
+    clearAll();
+    showProgress();
+    
+    try {
+        updateProgress(25, 'Fetching page...');
+        
+        const response = await fetch('/api/v1/smart-image-scraper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        
+        updateProgress(60, 'Processing images...');
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateProgress(100, 'Complete!');
+            extractedData = result;
+            
+            setTimeout(() => {
+                hideProgress();
+                displayResults();
+                showMessage('Images extracted successfully!', 'success');
+            }, 500);
+        } else {
+            hideProgress();
+            clearAll();
+            showMessage('Failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (err) {
+        hideProgress();
+        clearAll();
+        showMessage('Error: ' + err.message, 'error');
+    }
+}
+
+function clearAll() {
+    extractedData = null;
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('filteredImages').innerHTML = '';
+    document.getElementById('allImages').innerHTML = '';
+    clearMessages();
+}
+
+function clearMessages() {
+    document.querySelectorAll('.error-message, .success-message').forEach(m => m.remove());
+}
+
+function showMessage(text, type) {
+    clearMessages();
+    const div = document.createElement('div');
+    div.className = `${type}-message fixed top-4 right-4 z-50 max-w-md`;
+    div.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'} mr-2"></i>${text}`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+}
+
+function showProgress() {
+    document.getElementById('progressSection').style.display = 'block';
+    document.getElementById('extractButton').disabled = true;
+    document.getElementById('extractButton').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+}
+
+function hideProgress() {
+    document.getElementById('progressSection').style.display = 'none';
+    document.getElementById('extractButton').disabled = false;
+    document.getElementById('extractButton').innerHTML = '<i class="fas fa-images mr-2"></i>Extract Images';
+}
+
+function updateProgress(pct, text) {
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = text;
+}
+
+function displayResults() {
+    if (!extractedData) return;
+    
+    // Update stats
+    document.getElementById('totalFound').textContent = extractedData.total_found || 0;
+    document.getElementById('filteredCount').textContent = extractedData.filtered_count || 0;
+    
+    // Count content and lazy images from all images
+    const allImages = extractedData.all_images || [];
+    const contentCount = allImages.filter(img => img.container_type === 'content').length;
+    const lazyCount = allImages.filter(img => img.is_lazy).length;
+    
+    document.getElementById('contentImages').textContent = contentCount;
+    document.getElementById('lazyImages').textContent = lazyCount;
+    
+    // Display images
+    displayTopImages();
+    displayAllImages();
+    
+    // Show results
+    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function displayTopImages() {
+    const container = document.getElementById('topImages');
+    const images = extractedData.top_images || [];
+    
+    if (images.length === 0) {
+        container.innerHTML = `
+            <div class="no-images">
+                <i class="fas fa-star"></i>
+                <h3>No top images found</h3>
+                <p>No images met the quality threshold</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = images.map(img => createImageCard(img)).join('');
+}
+
+function displayAllImages() {
+    const container = document.getElementById('allImages');
+    const images = extractedData.all_images || [];
+    
+    if (images.length === 0) {
+        container.innerHTML = `
+            <div class="no-images">
+                <i class="fas fa-images"></i>
+                <h3>No images found</h3>
+                <p>The page doesn't contain any relevant images</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = images.map(img => createImageCard(img)).join('');
+}
+
+function createImageCard(img) {
+    const width = img.width || 'N/A';
+    const height = img.height || 'N/A';
+    const size = img.size_kb ? `${img.size_kb} KB` : 'Unknown';
+    const alt = img.alt || 'No alt text';
+    const score = img.content_score || 0;
+    
+    return `
+        <div class="image-card">
+            <div class="image-container">
+                <img src="${img.url}" alt="${alt}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI3MjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+'">
+                ${img.is_main_image ? '<div class="main-image-badge">MAIN IMAGE</div>' : ''}
+            </div>
+            <div class="image-info">
+                <div class="font-medium text-gray-900 truncate">${alt}</div>
+                <div class="image-url text-xs">${img.url}</div>
+                <div class="image-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-ruler-horizontal text-xs"></i>
+                        ${width}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-ruler-vertical text-xs"></i>
+                        ${height}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-file text-xs"></i>
+                        ${size}
+                    </span>
+                </div>
+                <div class="image-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-star text-xs"></i>
+                        Score: ${score}/100
+                    </span>
+                    ${img.resolution ? `
+                    <span class="meta-item">
+                        <i class="fas fa-expand text-xs"></i>
+                        ${img.resolution.toLocaleString()}px
+                    </span>
+                    ` : ''}
+                </div>
+                ${img.is_lazy ? '<span class="lazy-badge">Lazy Loaded</span>' : ''}
+                <span class="container-badge ${img.container_type}">
+                    ${img.container_type === 'content' ? 'Content' : img.container_type === 'ui' ? 'UI' : 'Unknown'}
+                </span>
+            </div>
+        </div>
+    `;
+}
+
+function showTopImages() {
+    document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('topImages').style.display = 'grid';
+    document.getElementById('allImages').style.display = 'none';
+}
+
+function showAllImages() {
+    document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('topImages').style.display = 'none';
+    document.getElementById('allImages').style.display = 'grid';
+}
+</script>
+{% endblock %}

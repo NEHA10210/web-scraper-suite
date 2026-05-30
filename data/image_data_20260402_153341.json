@@ -1,0 +1,18 @@
+{
+  "url": "https://www.amazon.in/dp/B0FQFQF6D1",
+  "scraped_at": "2026-04-02T15:33:41.578732",
+  "statistics": {
+    "total_found": 1,
+    "downloaded": 1,
+    "total_size_mb": 4.100799560546875e-05,
+    "downloaded_images": [
+      {
+        "filename": "image_0_requestId=4MQC127DQCTP3J0DKAXA&js=0.jpg",
+        "filepath": "data\\images\\image_0_requestId=4MQC127DQCTP3J0DKAXA&js=0.jpg",
+        "size_bytes": 43,
+        "data_url": "data:image/jpg;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAAAAAAALAAAAAABAAEAAAICTAEAOw==",
+        "original_src": "https://fls-eu.amazon.in/1/oc-csi/1/OP/requestId=4MQC127DQCTP3J0DKAXA&js=0"
+      }
+    ]
+  }
+}

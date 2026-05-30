@@ -1,0 +1,1583 @@
+{% extends "base.html" %}
+
+{% block title %}Enhanced Text Scraper with NLP{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Text Scraper Styles */
+.enhanced-scraper-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.content-tabs {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #374151;
+    background: #f9fafb;
+}
+
+.tab-button.active {
+    color: #10b981;
+    border-bottom-color: #10b981;
+}
+
+.tab-button .badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.content-section {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.content-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.keyword-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+    font-weight: 500;
+}
+
+.entity-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+    font-weight: 500;
+}
+
+.entity-person { background: #dbeafe; color: #1e40af; }
+.entity-org { background: #fce7f3; color: #a21caf; }
+.entity-gpe { background: #d1fae5; color: #065f46; }
+.entity-product { background: #fed7aa; color: #c2410c; }
+.entity-event { background: #e9d5ff; color: #7c3aed; }
+
+.heading-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    border-left: 4px solid #10b981;
+}
+
+.heading-level-1 { border-left-color: #ef4444; font-size: 1.25rem; font-weight: 600; }
+.heading-level-2 { border-left-color: #f59e0b; font-size: 1.125rem; font-weight: 500; }
+.heading-level-3 { border-left-color: #10b981; font-size: 1rem; font-weight: 500; }
+.heading-level-4 { border-left-color: #3b82f6; font-size: 0.875rem; }
+.heading-level-5 { border-left-color: #8b5cf6; font-size: 0.875rem; }
+.heading-level-6 { border-left-color: #6b7280; font-size: 0.875rem; }
+
+.paragraph-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    line-height: 1.6;
+    transition: all 0.2s ease;
+}
+
+.paragraph-item:hover {
+    border-color: #10b981;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.list-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f3f4f6;
+    border-radius: 0.5rem;
+}
+
+.list-item ul, .list-item ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.list-item li {
+    margin: 0.25rem 0;
+    line-height: 1.5;
+}
+
+.seo-score {
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.seo-score.excellent { color: #10b981; }
+.seo-score.good { color: #3b82f6; }
+.seo-score.fair { color: #f59e0b; }
+.seo-score.poor { color: #ef4444; }
+
+.readability-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.readability-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.readability-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+    transition: width 0.5s ease;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.export-button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.export-button.json { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.export-button.markdown { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.export-button.csv { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+.progress-container {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 1rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.loading-spinner {
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #10b981;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 3rem;
+    height: 1.5rem;
+    margin: 0 0.5rem;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 1.5rem;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.125rem;
+    width: 1.125rem;
+    left: 0.1875rem;
+    bottom: 0.1875rem;
+    background: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background: #10b981;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(1.5rem);
+}
+
+.highlight {
+    background: #fef3c7;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .enhanced-scraper-container {
+        padding: 1rem;
+    }
+    
+    .content-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .export-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="enhanced-scraper-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="text-4xl font-bold mb-4">Enhanced Text Scraper</h1>
+        <p class="text-xl opacity-90 mb-6">Advanced NLP-powered text extraction, cleaning, and analysis</p>
+        
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="totalWords">0</div>
+                <div class="stat-label">Words Processed</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="keywordsFound">0</div>
+                <div class="stat-label">Keywords Found</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="entitiesFound">0</div>
+                <div class="stat-label">Entities Detected</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="avgReadability">0</div>
+                <div class="stat-label">Readability Score</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="feature-card">
+        <h2 class="text-2xl font-bold mb-6">Extract & Analyze Text Content</h2>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Target URL</label>
+            <div class="flex gap-2">
+                <input type="url" id="targetUrl" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="https://example.com/article">
+                <button onclick="startEnhancedScraping()" id="scrapeBtn" class="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200">
+                    <i class="fas fa-magic mr-2"></i>Extract & Analyze
+                </button>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Processing Options</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="extractEntities" checked class="mr-2">
+                        <span>Extract Named Entities</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="generateKeywords" checked class="mr-2">
+                        <span>Generate Keywords</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="analyzeSEO" checked class="mr-2">
+                        <span>SEO Analysis</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Content Options</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="cleanText" checked class="mr-2">
+                        <span>Clean & Filter Text</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="extractStructure" checked class="mr-2">
+                        <span>Extract Structure</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="generateSummary" checked class="mr-2">
+                        <span>Generate Summary</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Advanced</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="javascript" checked class="mr-2">
+                        <span>Enable JavaScript</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="scrollContent" checked class="mr-2">
+                        <span>Scroll for Content</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="classifyContent" checked class="mr-2">
+                        <span>Classify Content</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="progress-container hidden">
+        <h3 class="text-lg font-semibold mb-4">Processing Content...</h3>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <p id="progressText" class="text-center text-gray-600">Initializing...</p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="hidden">
+        <!-- Export Options -->
+        <div class="export-buttons">
+            <button onclick="exportData('json')" class="export-button json">
+                <i class="fas fa-code"></i> Export JSON
+            </button>
+            <button onclick="exportData('markdown')" class="export-button markdown">
+                <i class="fas fa-markdown"></i> Export Markdown
+            </button>
+            <button onclick="exportData('csv')" class="export-button csv">
+                <i class="fas fa-file-csv"></i> Export CSV
+            </button>
+            <button onclick="copyToClipboard()" class="export-button">
+                <i class="fas fa-copy"></i> Copy Clean Text
+            </button>
+            <label class="export-button">
+                <i class="fas fa-eye"></i>
+                <span>Show Raw Text</span>
+                <input type="checkbox" id="toggleRawText" onchange="toggleTextView()" class="hidden">
+                <span class="toggle-switch">
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+        </div>
+
+        <!-- Content Tabs -->
+        <div class="content-tabs">
+            <button class="tab-button active" onclick="switchTab('overview')">
+                Overview <span class="badge" id="overviewBadge" style="display: none;">!</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('structure')">
+                Structure <span class="badge" id="structureBadge">0</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('keywords')">
+                Keywords <span class="badge" id="keywordsBadge">0</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('entities')">
+                Entities <span class="badge" id="entitiesBadge">0</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('seo')">
+                SEO Analysis <span class="badge" id="seoBadge">0</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('readability')">
+                Readability <span class="badge" id="readabilityBadge">0</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('content')">
+                Content <span class="badge" id="contentBadge">0</span>
+            </button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="tabOverview" class="content-section active">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Content Overview -->
+                <div class="feature-card">
+                    <h3 class="text-lg font-semibold mb-4">Content Overview</h3>
+                    <div id="contentOverview">
+                        <!-- Content overview will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Classification & Metadata -->
+                <div class="feature-card">
+                    <h3 class="text-lg font-semibold mb-4">Classification & Metadata</h3>
+                    <div id="classificationInfo">
+                        <!-- Classification info will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Summary -->
+            <div class="feature-card mt-6">
+                <h3 class="text-lg font-semibold mb-4">Content Summary</h3>
+                <div id="contentSummary">
+                    <!-- Summary will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tabStructure" class="content-section">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Headings -->
+                <div class="feature-card">
+                    <h3 class="text-lg font-semibold mb-4">Document Structure</h3>
+                    <div id="headingsList">
+                        <!-- Headings will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Lists -->
+                <div class="feature-card">
+                    <h3 class="text-lg font-semibold mb-4">Lists & Bullets</h3>
+                    <div id="listsList">
+                        <!-- Lists will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabKeywords" class="content-section">
+            <div class="feature-card">
+                <h3 class="text-lg font-semibold mb-4">Top Keywords</h3>
+                <div id="keywordsList">
+                    <!-- Keywords will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tabEntities" class="content-section">
+            <div class="feature-card">
+                <h3 class="text-lg font-semibold mb-4">Named Entities</h3>
+                <div id="entitiesList">
+                    <!-- Entities will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tabSEO" class="content-section">
+            <div class="feature-card">
+                <h3 class="text-lg font-semibold mb-4">SEO Analysis</h3>
+                <div id="seoAnalysis">
+                    <!-- SEO analysis will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tabReadability" class="content-section">
+            <div class="feature-card">
+                <h3 class="text-lg font-semibold mb-4">Readability Metrics</h3>
+                <div id="readabilityMetrics">
+                    <!-- Readability metrics will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tabContent" class="content-section">
+            <div class="feature-card">
+                <h3 class="text-lg font-semibold mb-4">Clean Content</h3>
+                <div id="cleanContent">
+                    <!-- Clean content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced Text Scraper JavaScript
+let processedData = null;
+let currentView = 'clean'; // 'clean' or 'raw'
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+});
+
+// Start enhanced scraping
+async function startEnhancedScraping() {
+    const url = document.getElementById('targetUrl').value;
+    if (!url) {
+        showError('Please enter a URL to analyze');
+        return;
+    }
+    
+    // Clear previous results and errors
+    clearResults();
+    clearErrors();
+    
+    // Show progress
+    showProgress();
+    
+    // Build configuration
+    const config = {
+        javascript: document.getElementById('javascript').checked,
+        scroll: document.getElementById('scrollContent').checked,
+        clean_text: document.getElementById('cleanText').checked,
+        extract_structure: document.getElementById('extractStructure').checked,
+        extract_entities: document.getElementById('extractEntities').checked,
+        generate_keywords: document.getElementById('generateKeywords').checked,
+        analyze_seo: document.getElementById('analyzeSEO').checked,
+        generate_summary: document.getElementById('generateSummary').checked,
+        classify_content: document.getElementById('classifyContent').checked
+    };
+    
+    try {
+        updateProgress(20, 'Fetching webpage...');
+        
+        const response = await fetch('/api/v1/enhanced-text-scraper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, config })
+        });
+        
+        updateProgress(60, 'Processing content...');
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateProgress(80, 'Analyzing text...');
+            processedData = result.processed_content;
+            
+            updateProgress(100, 'Complete!');
+            
+            setTimeout(() => {
+                hideProgress();
+                displayResults();
+                showSuccess('Content analyzed successfully!');
+            }, 1000);
+        } else {
+            hideProgress();
+            clearResults(); // Clear any partial results
+            showError('Analysis failed: ' + result.error);
+        }
+        
+    } catch (error) {
+        hideProgress();
+        clearResults(); // Clear any partial results
+        showError('Analysis failed: ' + error.message);
+    }
+}
+
+// Clear all results
+function clearResults() {
+    processedData = null;
+    document.getElementById('resultsSection').classList.add('hidden');
+    
+    // Clear all content areas
+    const contentAreas = [
+        'contentOverview', 'classificationInfo', 'contentSummary',
+        'headingsList', 'listsList', 'keywordsList', 'entitiesList',
+        'seoAnalysis', 'readabilityMetrics', 'cleanContent'
+    ];
+    
+    contentAreas.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '';
+        }
+    });
+    
+    // Reset badges
+    const badges = ['structureBadge', 'keywordsBadge', 'entitiesBadge', 'seoBadge', 'readabilityBadge', 'contentBadge'];
+    badges.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '0';
+        }
+    });
+    
+    // Reset stats
+    document.getElementById('totalWords').textContent = '0';
+    document.getElementById('keywordsFound').textContent = '0';
+    document.getElementById('entitiesFound').textContent = '0';
+    document.getElementById('avgReadability').textContent = '0';
+}
+
+// Clear all error messages
+function clearErrors() {
+    // Remove any existing error/success messages
+    const messages = document.querySelectorAll('.error-message, .success-message');
+    messages.forEach(msg => msg.remove());
+}
+
+// Show error with cleanup
+function showError(message) {
+    clearErrors(); // Clear previous messages
+    clearResults(); // Clear any partial results
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message fixed top-4 right-4 z-50 max-w-md';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+// Show success with cleanup
+function showSuccess(message) {
+    clearErrors(); // Clear previous messages
+    
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message fixed top-4 right-4 z-50 max-w-md';
+    successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+    document.body.appendChild(successDiv);
+    
+    setTimeout(() => {
+        successDiv.remove();
+    }, 5000);
+}
+
+// Show progress
+function showProgress() {
+    document.getElementById('progressSection').classList.remove('hidden');
+    document.getElementById('scrapeBtn').disabled = true;
+    document.getElementById('scrapeBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+}
+
+// Hide progress
+function hideProgress() {
+    document.getElementById('progressSection').classList.add('hidden');
+    document.getElementById('scrapeBtn').disabled = false;
+    document.getElementById('scrapeBtn').innerHTML = '<i class="fas fa-magic mr-2"></i>Extract & Analyze';
+}
+
+// Update progress
+function updateProgress(percent, text) {
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressText').textContent = text;
+}
+
+// Display results
+function displayResults() {
+    if (!processedData) return;
+    
+    // Show results section
+    document.getElementById('resultsSection').classList.remove('hidden');
+    
+    // Update badges
+    updateBadges();
+    
+    // Update overview
+    displayOverview();
+    
+    // Update structure
+    displayStructure();
+    
+    // Update keywords
+    displayKeywords();
+    
+    // Update entities
+    displayEntities();
+    
+    // Update SEO analysis
+    displaySEO();
+    
+    // Update readability
+    displayReadability();
+    
+    // Update content
+    displayContent();
+    
+    // Update stats
+    updateStats();
+    
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Update badges
+function updateBadges() {
+    document.getElementById('structureBadge').textContent = 
+        (processedData.headings?.length || 0) + (processedData.lists?.length || 0);
+    document.getElementById('keywordsBadge').textContent = processedData.keywords?.length || 0;
+    document.getElementById('entitiesBadge').textContent = processedData.entities?.length || 0;
+    document.getElementById('seoBadge').textContent = processedData.seo?.recommendations?.length || 0;
+    document.getElementById('readabilityBadge').textContent = processedData.readability?.difficulty || 'N/A';
+    document.getElementById('contentBadge').textContent = processedData.paragraphs?.length || 0;
+}
+
+// Display overview
+function displayOverview() {
+    const overview = document.getElementById('contentOverview');
+    const metadata = processedData.metadata || {};
+    const classification = processedData.classification || {};
+    
+    overview.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-semibold text-lg mb-2">${processedData.title || 'Untitled'}</h4>
+                <p class="text-gray-600 text-sm">URL: <a href="${metadata.url || '#'}" target="_blank" class="text-green-600 hover:underline">${metadata.url || 'N/A'}</a></p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <div class="text-sm text-gray-600">Word Count</div>
+                    <div class="font-semibold">${metadata.word_count || 0}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-600">Reading Time</div>
+                    <div class="font-semibold">${processedData.readability?.reading_time_minutes || 0} min</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-600">Paragraphs</div>
+                    <div class="font-semibold">${processedData.paragraphs?.length || 0}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-600">Images</div>
+                    <div class="font-semibold">${metadata.image_count || 0}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const classificationInfo = document.getElementById('classificationInfo');
+    classificationInfo.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <div class="text-sm text-gray-600">Content Type</div>
+                <div class="font-semibold text-lg capitalize">${classification.type || 'Unknown'}</div>
+                <div class="text-sm text-gray-500">Confidence: ${Math.round((classification.confidence || 0) * 100)}%</div>
+            </div>
+            
+            <div>
+                <div class="text-sm text-gray-600">Language</div>
+                <div class="font-semibold">${classification.language || 'Unknown'}</div>
+            </div>
+            
+            <div>
+                <div class="text-sm text-gray-600">Processed</div>
+                <div class="font-semibold">${new Date(metadata.processed_at).toLocaleString()}</div>
+            </div>
+            
+            <div>
+                <div class="text-sm text-gray-600">Quality Score</div>
+                <div class="font-semibold">${calculateQualityScore()}%</div>
+            </div>
+        </div>
+    `;
+    
+    // Display summary
+    const summary = processedData.summary || {};
+    const summaryDiv = document.getElementById('contentSummary');
+    summaryDiv.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-semibold mb-2">Short Summary</h4>
+                <p class="text-gray-700">${summary.short || 'No summary available'}</p>
+            </div>
+            
+            ${summary.long ? `
+            <div>
+                <h4 class="font-semibold mb-2">Detailed Summary</h4>
+                <p class="text-gray-700">${summary.long}</p>
+            </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Display structure
+function displayStructure() {
+    const headingsList = document.getElementById('headingsList');
+    const headings = processedData.headings || [];
+    
+    if (headings.length > 0) {
+        headingsList.innerHTML = headings.map(heading => `
+            <div class="heading-item heading-level-${heading.level}">
+                <div class="flex items-center justify-between">
+                    <span class="font-medium">H${heading.level}</span>
+                    <a href="#${heading.anchor}" class="text-green-600 text-sm">#</a>
+                </div>
+                <div>${highlightKeywords(heading.text)}</div>
+            </div>
+        `).join('');
+    } else {
+        headingsList.innerHTML = '<p class="text-gray-500">No headings found</p>';
+    }
+    
+    const listsList = document.getElementById('listsList');
+    const lists = processedData.lists || [];
+    
+    if (lists.length > 0) {
+        listsList.innerHTML = lists.map((list, index) => `
+            <div class="list-item">
+                <div class="font-medium mb-2">${list.type === 'ul' ? 'Bullet List' : 'Numbered List'} (${list.items.length} items)</div>
+                <${list.type}>
+                    ${list.items.map(item => `<li>${highlightKeywords(item)}</li>`).join('')}
+                </${list.type}>
+            </div>
+        `).join('');
+    } else {
+        listsList.innerHTML = '<p class="text-gray-500">No lists found</p>';
+    }
+}
+
+// Display keywords
+function displayKeywords() {
+    const keywordsList = document.getElementById('keywordsList');
+    const keywords = processedData.keywords || [];
+    
+    if (keywords.length > 0) {
+        keywordsList.innerHTML = `
+            <div class="space-y-4">
+                <div class="flex flex-wrap gap-2">
+                    ${keywords.map(keyword => `
+                        <span class="keyword-tag" title="Density: ${keyword.density}%">
+                            ${keyword.keyword} <small>(${keyword.density}%)</small>
+                        </span>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-semibold mb-3">Top Keywords by Frequency</h4>
+                    <div class="space-y-2">
+                        ${keywords.slice(0, 10).map(keyword => `
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">${keyword.keyword}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full" style="width: ${Math.min(keyword.density * 5, 100)}%"></div>
+                                    </div>
+                                    <span class="text-sm text-gray-600">${keyword.frequency}x</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        keywordsList.innerHTML = '<p class="text-gray-500">No keywords found</p>';
+    }
+}
+
+// Display entities
+function displayEntities() {
+    const entitiesList = document.getElementById('entitiesList');
+    const entities = processedData.entities || [];
+    
+    if (entities.length > 0) {
+        // Group entities by type
+        const groupedEntities = {};
+        entities.forEach(entity => {
+            if (!groupedEntities[entity.label]) {
+                groupedEntities[entity.label] = [];
+            }
+            groupedEntities[entity.label].push(entity);
+        });
+        
+        entitiesList.innerHTML = Object.entries(groupedEntities).map(([type, entityList]) => `
+            <div class="mb-6">
+                <h4 class="font-semibold mb-3">${type} (${entityList.length})</h4>
+                <div class="flex flex-wrap gap-2">
+                    ${entityList.map(entity => `
+                        <span class="entity-badge entity-${type.toLowerCase()}" title="${entity.description || type}">
+                            ${entity.text} ${entity.count > 1 ? `(${entity.count})` : ''}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    } else {
+        entitiesList.innerHTML = '<p class="text-gray-500">No entities found</p>';
+    }
+}
+
+// Display SEO analysis
+function displaySEO() {
+    const seoAnalysis = document.getElementById('seoAnalysis');
+    const seo = processedData.seo || {};
+    
+    const seoScore = calculateSEOScore(seo);
+    const scoreClass = seoScore >= 80 ? 'excellent' : seoScore >= 60 ? 'good' : seoScore >= 40 ? 'fair' : 'poor';
+    
+    seoAnalysis.innerHTML = `
+        <div class="space-y-6">
+            <div class="text-center">
+                <div class="seo-score ${scoreClass}">${seoScore}</div>
+                <div class="text-sm text-gray-600">SEO Score</div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">Title Analysis</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Present:</span>
+                            <span class="${seo.title?.present ? 'text-green-600' : 'text-red-600'}">
+                                ${seo.title?.present ? '✓' : '✗'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Length:</span>
+                            <span>${seo.title?.length || 0} chars</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Optimal:</span>
+                            <span class="${seo.title?.optimal ? 'text-green-600' : 'text-orange-600'}">
+                                ${seo.title?.optimal ? '✓' : '✗'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-3">Meta Description</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Present:</span>
+                            <span class="${seo.meta_description?.present ? 'text-green-600' : 'text-red-600'}">
+                                ${seo.meta_description?.present ? '✓' : '✗'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Length:</span>
+                            <span>${seo.meta_description?.length || 0} chars</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Optimal:</span>
+                            <span class="${seo.meta_description?.optimal ? 'text-green-600' : 'text-orange-600'}">
+                                ${seo.meta_description?.optimal ? '✓' : '✗'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-semibold mb-3">Content Structure</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="font-semibold">${seo.headings?.h1_count || 0}</div>
+                        <div class="text-sm text-gray-600">H1 Tags</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">${seo.content?.word_count || 0}</div>
+                        <div class="text-sm text-gray-600">Words</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">${seo.content?.image_count || 0}</div>
+                        <div class="text-sm text-gray-600">Images</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">${seo.content?.link_count || 0}</div>
+                        <div class="text-sm text-gray-600">Links</div>
+                    </div>
+                </div>
+            </div>
+            
+            ${seo.recommendations && seo.recommendations.length > 0 ? `
+            <div>
+                <h4 class="font-semibold mb-3">Recommendations</h4>
+                <ul class="space-y-2">
+                    ${seo.recommendations.map(rec => `
+                        <li class="flex items-start">
+                            <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-2"></i>
+                            <span>${rec}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Display readability
+function displayReadability() {
+    const readabilityMetrics = document.getElementById('readabilityMetrics');
+    const readability = processedData.readability || {};
+    
+    const difficulty = readability.difficulty || 'Unknown';
+    const difficultyColor = {
+        'Very Easy': 'text-green-600',
+        'Easy': 'text-green-600',
+        'Fairly Easy': 'text-blue-600',
+        'Standard': 'text-blue-600',
+        'Fairly Difficult': 'text-orange-600',
+        'Difficult': 'text-red-600',
+        'Very Difficult': 'text-red-600'
+    }[difficulty] || 'text-gray-600';
+    
+    readabilityMetrics.innerHTML = `
+        <div class="space-y-6">
+            <div class="readability-indicator">
+                <div class="text-center">
+                    <div class="font-semibold text-lg mb-2">Difficulty Level</div>
+                    <div class="font-bold text-2xl ${difficultyColor}">${difficulty}</div>
+                </div>
+                <div class="readability-bar">
+                    <div class="readability-fill" style="width: ${Math.max(0, Math.min(100, readability.flesch_score || 0))}%"></div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>Very Easy</span>
+                    <span>Very Difficult</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="font-semibold text-lg">${readability.reading_time_minutes || 0}</div>
+                    <div class="text-sm text-gray-600">Min. Read Time</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-semibold text-lg">${Math.round(readability.flesch_score || 0)}</div>
+                    <div class="text-sm text-gray-600">Flesch Score</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-semibold text-lg">${readability.grade_level || 0}</div>
+                    <div class="text-sm text-gray-600">Grade Level</div>
+                </div>
+                <div class="text-center">
+                    <div class="font-semibold text-lg">${Math.round(readability.avg_sentence_length || 0)}</div>
+                    <div class="text-sm text-gray-600">Avg. Sentence</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">Content Statistics</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Total Words:</span>
+                            <span class="font-medium">${readability.total_words || 0}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Total Sentences:</span>
+                            <span class="font-medium">${readability.total_sentences || 0}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Avg. Sentence Length:</span>
+                            <span class="font-medium">${Math.round(readability.avg_sentence_length || 0)} words</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-3">Reading Level Guide</h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span>90-100:</span>
+                            <span class="text-green-600">Very Easy</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>80-90:</span>
+                            <span class="text-green-600">Easy</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>70-80:</span>
+                            <span class="text-blue-600">Fairly Easy</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>60-70:</span>
+                            <span class="text-blue-600">Standard</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>50-60:</span>
+                            <span class="text-orange-600">Fairly Difficult</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>30-50:</span>
+                            <span class="text-red-600">Difficult</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>0-30:</span>
+                            <span class="text-red-600">Very Difficult</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Display content
+function displayContent() {
+    const cleanContent = document.getElementById('cleanContent');
+    const paragraphs = processedData.paragraphs || [];
+    
+    if (paragraphs.length > 0) {
+        if (currentView === 'clean') {
+            // Show structured clean content
+            cleanContent.innerHTML = paragraphs.map((para, index) => `
+                <div class="paragraph-item">
+                    <div class="text-sm text-gray-500 mb-2">Paragraph ${index + 1}</div>
+                    <div>${highlightKeywords(para)}</div>
+                </div>
+            `).join('');
+        } else {
+            // Show raw text as a single block
+            const rawText = paragraphs.join('\n\n');
+            cleanContent.innerHTML = `
+                <div class="paragraph-item">
+                    <div class="text-sm text-gray-500 mb-2">Raw Text Content</div>
+                    <pre class="whitespace-pre-wrap text-sm leading-relaxed">${rawText}</pre>
+                </div>
+            `;
+        }
+    } else {
+        cleanContent.innerHTML = '<p class="text-gray-500">No content found</p>';
+    }
+}
+
+// Toggle text view
+function toggleTextView() {
+    currentView = document.getElementById('toggleRawText').checked ? 'raw' : 'clean';
+    displayContent();
+    
+    // Update button text
+    const toggleLabel = document.querySelector('label[for="toggleRawText"] span');
+    if (toggleLabel) {
+        toggleLabel.textContent = currentView === 'raw' ? 'Show Clean Text' : 'Show Raw Text';
+    }
+}
+
+// Switch tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.content-section').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+}
+
+// Export data
+function exportData(format) {
+    if (!processedData) {
+        showError('No data to export');
+        return;
+    }
+    
+    // Create export data based on format
+    let exportContent = '';
+    let filename = `scraped_content_${Date.now()}`;
+    let mimeType = 'text/plain';
+    
+    switch (format) {
+        case 'json':
+            exportContent = JSON.stringify(processedData, null, 2);
+            filename += '.json';
+            mimeType = 'application/json';
+            break;
+        case 'markdown':
+            exportContent = exportToMarkdown(processedData);
+            filename += '.md';
+            mimeType = 'text/markdown';
+            break;
+        case 'csv':
+            exportContent = exportToCSV(processedData);
+            filename += '.csv';
+            mimeType = 'text/csv';
+            break;
+    }
+    
+    // Download file
+    const blob = new Blob([exportContent], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showSuccess(`Data exported as ${format.toUpperCase()}`);
+}
+
+// Copy to clipboard
+function copyToClipboard() {
+    if (!processedData) {
+        showError('No data to copy');
+        return;
+    }
+    
+    // Create clean text from structured data
+    let textToCopy = '';
+    
+    if (processedData.title) {
+        textToCopy += `${processedData.title}\n\n`;
+    }
+    
+    if (processedData.paragraphs && processedData.paragraphs.length > 0) {
+        textToCopy += processedData.paragraphs.join('\n\n');
+    }
+    
+    if (processedData.headings && processedData.headings.length > 0) {
+        textToCopy += '\n\n--- Headings ---\n';
+        processedData.headings.forEach(h => {
+            textToCopy += `${'#'.repeat(h.level)} ${h.text}\n`;
+        });
+    }
+    
+    if (processedData.keywords && processedData.keywords.length > 0) {
+        textToCopy += '\n\n--- Keywords ---\n';
+        processedData.keywords.slice(0, 10).forEach(k => {
+            textToCopy += `- ${k.keyword} (density: ${k.density}%)\n`;
+        });
+    }
+    
+    if (!textToCopy.trim()) {
+        showError('No content to copy');
+        return;
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showSuccess('Content copied to clipboard!');
+    }).catch(() => {
+        showError('Failed to copy to clipboard');
+    });
+}
+
+// Helper functions
+function highlightKeywords(text) {
+    if (!processedData.keywords) return text;
+    
+    let highlightedText = text;
+    processedData.keywords.slice(0, 5).forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword.keyword}\\b`, 'gi');
+        highlightedText = highlightedText.replace(regex, `<span class="highlight">${keyword.keyword}</span>`);
+    });
+    
+    return highlightedText;
+}
+
+function calculateSEOScore(seo) {
+    let score = 0;
+    
+    if (seo.title?.present) score += 15;
+    if (seo.title?.optimal) score += 15;
+    if (seo.meta_description?.present) score += 15;
+    if (seo.meta_description?.optimal) score += 15;
+    if (seo.headings?.has_h1) score += 10;
+    if (seo.headings?.h1_count === 1) score += 10;
+    if (seo.content?.word_count >= 300) score += 10;
+    if (seo.content?.word_count >= 600) score += 10;
+    
+    return Math.min(score, 100);
+}
+
+function calculateQualityScore() {
+    if (!processedData) return 0;
+    
+    let score = 0;
+    const metadata = processedData.metadata || {};
+    const readability = processedData.readability || {};
+    const seo = processedData.seo || {};
+    
+    // Content quality (40%)
+    if (processedData.title) score += 10;
+    if (processedData.paragraphs && processedData.paragraphs.length > 0) score += 10;
+    if (metadata.word_count >= 300) score += 10;
+    if (readability.flesch_score >= 60) score += 10;
+    
+    // Structure quality (30%)
+    if (processedData.headings && processedData.headings.length > 0) score += 10;
+    if (processedData.keywords && processedData.keywords.length > 0) score += 10;
+    if (processedData.entities && processedData.entities.length > 0) score += 10;
+    
+    // SEO quality (30%)
+    if (seo.title?.present) score += 10;
+    if (seo.meta_description?.present) score += 10;
+    if (seo.headings?.has_h1) score += 10;
+    
+    return Math.min(score, 100);
+}
+
+function exportToMarkdown(data) {
+    // Simple markdown export
+    let md = `# ${data.title || 'Untitled'}\n\n`;
+    
+    if (data.summary?.short) {
+        md += `## Summary\n${data.summary.short}\n\n`;
+    }
+    
+    if (data.keywords && data.keywords.length > 0) {
+        md += `## Keywords\n`;
+        data.keywords.slice(0, 10).forEach(k => {
+            md += `- **${k.keyword}** (density: ${k.density}%)\n`;
+        });
+        md += '\n';
+    }
+    
+    if (data.entities && data.entities.length > 0) {
+        md += `## Entities\n`;
+        data.entities.slice(0, 15).forEach(e => {
+            md += `- ${e.text} (${e.label})\n`;
+        });
+        md += '\n';
+    }
+    
+    if (data.paragraphs && data.paragraphs.length > 0) {
+        md += `## Content\n`;
+        data.paragraphs.forEach(p => {
+            md += `${p}\n\n`;
+        });
+    }
+    
+    return md;
+}
+
+function exportToCSV(data) {
+    let csv = 'Type,Content,Metadata\n';
+    
+    if (data.title) {
+        csv += `Title,"${data.title}","main"\n`;
+    }
+    
+    data.paragraphs?.forEach((p, i) => {
+        csv += `Paragraph,"${p.replace(/"/g, '""')}","para:${i+1}"\n`;
+    });
+    
+    data.keywords?.forEach(k => {
+        csv += `Keyword,"${k.keyword}","density:${k.density}%"\n`;
+    });
+    
+    data.entities?.forEach(e => {
+        csv += `Entity,"${e.text}","${e.label}"\n`;
+    });
+    
+    return csv;
+}
+
+function updateStats() {
+    // Update hero stats
+    if (processedData) {
+        document.getElementById('totalWords').textContent = processedData.metadata?.word_count || 0;
+        document.getElementById('keywordsFound').textContent = processedData.keywords?.length || 0;
+        document.getElementById('entitiesFound').textContent = processedData.entities?.length || 0;
+        document.getElementById('avgReadability').textContent = Math.round(processedData.readability?.flesch_score || 0);
+    }
+}
+
+function showError(message) {
+    // Create error notification
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message fixed top-4 right-4 z-50 max-w-md';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => errorDiv.remove(), 5000);
+}
+
+function showSuccess(message) {
+    // Create success notification
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message fixed top-4 right-4 z-50 max-w-md';
+    successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+    document.body.appendChild(successDiv);
+    
+    setTimeout(() => successDiv.remove(), 5000);
+}
+</script>
+{% endblock %}

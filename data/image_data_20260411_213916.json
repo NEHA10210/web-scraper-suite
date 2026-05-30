@@ -1,0 +1,10 @@
+{
+  "url": "https://httpbin.org/html",
+  "scraped_at": "2026-04-11T21:39:16.641376",
+  "statistics": {
+    "total_found": 0,
+    "downloaded": 0,
+    "total_size_mb": 0.0
+  },
+  "images": []
+}

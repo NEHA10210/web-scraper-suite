@@ -1,0 +1,993 @@
+{% extends "base.html" %}
+
+{% block title %}Professional Data Scraper{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Professional Data Scraper Styles */
+.scraper-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.template-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.template-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.template-card.selected {
+    border-color: #667eea;
+    background: #f3f4f6;
+}
+
+.job-status {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-running {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.data-preview {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.json-key {
+    color: #059669;
+    font-weight: 600;
+}
+
+.json-string {
+    color: #dc2626;
+}
+
+.json-number {
+    color: #2563eb;
+}
+
+.json-boolean {
+    color: #7c3aed;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.auth-section {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.loading-spinner {
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    background: #f9fafb;
+}
+
+.tab-button.active {
+    border-bottom-color: #667eea;
+    color: #667eea;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background: #10b981;
+}
+
+.notification.error {
+    background: #ef4444;
+}
+
+.notification.info {
+    background: #3b82f6;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scraper-container">
+    <!-- Header Section -->
+    <div class="gradient-bg text-center">
+        <h1 class="text-4xl font-bold mb-4">Professional Data Scraper</h1>
+        <p class="text-xl opacity-90">Advanced web scraping with Playwright, anti-bot protection, and structured data extraction</p>
+        
+        <!-- Quick Stats -->
+        <div class="stats-grid mt-8">
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="activeJobs">0</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="completedJobs">0</div>
+                <div class="stat-label">Completed Today</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="totalScraped">0</div>
+                <div class="stat-label">Total Scraped</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Panel - Configuration -->
+        <div class="lg:col-span-2">
+            <!-- Scraping Configuration -->
+            <div class="feature-card">
+                <h2 class="text-2xl font-bold mb-6">Scraping Configuration</h2>
+                
+                <!-- URL Input -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Target URL</label>
+                    <input type="url" id="targetUrl" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="https://example.com">
+                    <button onclick="validateUrl()" class="mt-2 text-sm text-purple-600 hover:text-purple-800">Validate URL</button>
+                </div>
+
+                <!-- Template Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Choose Template</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectTemplate('blog')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">Blog/Article</div>
+                            <div class="text-sm text-gray-500">Extract blog posts</div>
+                        </button>
+                        <button onclick="selectTemplate('ecommerce')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">E-commerce</div>
+                            <div class="text-sm text-gray-500">Product information</div>
+                        </button>
+                        <button onclick="selectTemplate('social_media')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">Social Media</div>
+                            <div class="text-sm text-gray-500">Posts and updates</div>
+                        </button>
+                        <button onclick="selectTemplate('news')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">News</div>
+                            <div class="text-sm text-gray-500">News articles</div>
+                        </button>
+                        <button onclick="selectTemplate('jobs')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">Job Board</div>
+                            <div class="text-sm text-gray-500">Job postings</div>
+                        </button>
+                        <button onclick="selectTemplate('custom')" class="template-btn p-3 border border-gray-300 rounded-lg hover:border-purple-500 text-left">
+                            <div class="font-medium">Custom</div>
+                            <div class="text-sm text-gray-500">Define your own</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Selectors -->
+                <div id="customSelectors" class="mb-6 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Custom CSS Selectors</label>
+                    <div class="space-y-2">
+                        <input type="text" id="customTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Title selector (e.g., h1, .title)">
+                        <input type="text" id="customContent" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Content selector (e.g., .content, article)">
+                        <input type="text" id="customImages" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Images selector (e.g., img, .photo)">
+                    </div>
+                </div>
+
+                <!-- Advanced Options -->
+                <div class="mb-6">
+                    <button onclick="toggleAdvanced()" class="text-purple-600 hover:text-purple-800 font-medium">
+                        <i class="fas fa-cog mr-2"></i>Advanced Options
+                    </button>
+                    
+                    <div id="advancedOptions" class="hidden mt-4 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Timeout (ms)</label>
+                                <input type="number" id="timeout" value="30000" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Delay (seconds)</label>
+                                <input type="number" id="delay" value="1.0" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="javascript" checked class="mr-2">
+                                <span>Enable JavaScript</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="scroll" class="mr-2">
+                                <span>Handle infinite scroll</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="screenshots" class="mr-2">
+                                <span>Take screenshots</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="saveToDb" class="mr-2">
+                                <span>Save to database</span>
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">User Agent</label>
+                            <select id="userAgent" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="">Random</option>
+                                <option value="chrome">Chrome</option>
+                                <option value="firefox">Firefox</option>
+                                <option value="safari">Safari</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Proxy (optional)</label>
+                            <input type="text" id="proxy" placeholder="http://proxy:port" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authentication Section -->
+                <div class="mb-6">
+                    <button onclick="toggleAuth()" class="text-purple-600 hover:text-purple-800 font-medium">
+                        <i class="fas fa-lock mr-2"></i>Authentication (Optional)
+                    </button>
+                    
+                    <div id="authSection" class="hidden mt-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Login URL</label>
+                            <input type="text" id="loginUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="https://example.com/login">
+                        </div>
+                        <button onclick="testAuth()" class="mt-2 text-sm text-purple-600 hover:text-purple-800">Test Authentication</button>
+                    </div>
+                </div>
+
+                <!-- Start Scraping Button -->
+                <button onclick="startScraping()" id="startBtn" class="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-purple-900 transition-all duration-200">
+                    <i class="fas fa-play mr-2"></i>Start Scraping
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="feature-card hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Scraping Results</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadResults('json')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-download mr-2"></i>Download JSON
+                        </button>
+                        <button onclick="downloadResults('csv')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-file-csv mr-2"></i>Download CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressContainer" class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium">Progress</span>
+                        <span id="progressText" class="text-sm text-gray-600">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Status and Stats -->
+                <div id="jobStatus" class="mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="job-status status-pending" id="statusBadge">Pending</span>
+                            <span class="ml-2 text-sm text-gray-600" id="jobDuration">Duration: --</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">Data Size</div>
+                            <div class="font-medium" id="dataSize">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Preview Tabs -->
+                <div class="border-b border-gray-200">
+                    <div class="flex space-x-8">
+                        <button onclick="switchTab('overview')" class="tab-button active">Overview</button>
+                        <button onclick="switchTab('content')" class="tab-button">Content</button>
+                        <button onclick="switchTab('images')" class="tab-button">Images</button>
+                        <button onclick="switchTab('links')" class="tab-button">Links</button>
+                        <button onclick="switchTab('raw')" class="tab-button">Raw Data</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tabOverview" class="tab-content active mt-6">
+                    <div id="overviewContent" class="data-preview">
+                        <!-- Overview content will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="tabContent" class="tab-content mt-6">
+                    <div id="contentPreview" class="data-preview">
+                        <!-- Content preview will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="tabImages" class="tab-content mt-6">
+                    <div id="imageGrid" class="grid grid-cols-3 gap-4">
+                        <!-- Images will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="tabLinks" class="tab-content mt-6">
+                    <div id="linksList" class="space-y-2">
+                        <!-- Links will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="tabRaw" class="tab-content mt-6">
+                    <div id="rawData" class="data-preview">
+                        <pre id="jsonPreview" class="text-sm"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Jobs & Monitoring -->
+        <div class="space-y-6">
+            <!-- Active Jobs -->
+            <div class="feature-card">
+                <h3 class="text-lg font-bold mb-4">Active Jobs</h3>
+                <div id="activeJobsList" class="space-y-2">
+                    <!-- Active jobs will be listed here -->
+                </div>
+            </div>
+
+            <!-- Recent Jobs -->
+            <div class="feature-card">
+                <h3 class="text-lg font-bold mb-4">Recent Jobs</h3>
+                <div id="recentJobsList" class="space-y-2">
+                    <!-- Recent jobs will be listed here -->
+                </div>
+            </div>
+
+            <!-- Monitoring Stats -->
+            <div class="feature-card">
+                <h3 class="text-lg font-bold mb-4">Performance Stats</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Success Rate</span>
+                        <span class="font-medium" id="successRateStat">0%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Avg Duration</span>
+                        <span class="font-medium" id="avgDurationStat">0s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Jobs Today</span>
+                        <span class="font-medium" id="jobsTodayStat">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Error Rate</span>
+                        <span class="font-medium text-red-600" id="errorRateStat">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Professional Data Scraper JavaScript
+let currentJobId = null;
+let selectedTemplate = null;
+let pollingInterval = null;
+let scrapedData = null;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadStats();
+    loadRecentJobs();
+    startMonitoring();
+});
+
+// Template selection
+function selectTemplate(template) {
+    selectedTemplate = template;
+    
+    // Update UI
+    document.querySelectorAll('.template-btn').forEach(btn => {
+        btn.classList.remove('border-purple-500', 'bg-purple-50');
+    });
+    event.target.closest('.template-btn').classList.add('border-purple-500', 'bg-purple-50');
+    
+    // Show/hide custom selectors
+    if (template === 'custom') {
+        document.getElementById('customSelectors').classList.remove('hidden');
+    } else {
+        document.getElementById('customSelectors').classList.add('hidden');
+    }
+}
+
+// Toggle advanced options
+function toggleAdvanced() {
+    const options = document.getElementById('advancedOptions');
+    options.classList.toggle('hidden');
+}
+
+// Toggle authentication
+function toggleAuth() {
+    const auth = document.getElementById('authSection');
+    auth.classList.toggle('hidden');
+}
+
+// Validate URL
+async function validateUrl() {
+    const url = document.getElementById('targetUrl').value;
+    if (!url) {
+        showNotification('Please enter a URL', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/v1/scraper/validate-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        
+        const result = await response.json();
+        if (result.success && result.valid) {
+            showNotification('URL is valid for scraping', 'success');
+        } else {
+            showNotification(result.message || 'URL is invalid', 'error');
+        }
+    } catch (error) {
+        showNotification('Validation failed', 'error');
+    }
+}
+
+// Test authentication
+async function testAuth() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const loginUrl = document.getElementById('loginUrl').value;
+    
+    if (!username || !password || !loginUrl) {
+        showNotification('Please fill all authentication fields', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/v1/scraper/auth/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                password,
+                login_url: loginUrl
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success && result.result.success) {
+            showNotification('Authentication successful!', 'success');
+        } else {
+            showNotification('Authentication failed: ' + (result.result.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        showNotification('Authentication test failed', 'error');
+    }
+}
+
+// Start scraping
+async function startScraping() {
+    const url = document.getElementById('targetUrl').value;
+    if (!url) {
+        showNotification('Please enter a URL', 'error');
+        return;
+    }
+    
+    // Build configuration
+    const config = {
+        url,
+        template: selectedTemplate,
+        timeout: parseInt(document.getElementById('timeout').value),
+        delay: parseFloat(document.getElementById('delay').value),
+        javascript: document.getElementById('javascript').checked,
+        scroll: document.getElementById('scroll').checked,
+        screenshots: document.getElementById('screenshots').checked,
+        save_to_db: document.getElementById('saveToDb').checked,
+        export_format: 'json'
+    };
+    
+    // Add custom selectors
+    if (selectedTemplate === 'custom') {
+        config.selectors = {};
+        const title = document.getElementById('customTitle').value;
+        const content = document.getElementById('customContent').value;
+        const images = document.getElementById('customImages').value;
+        
+        if (title) config.selectors.title = title;
+        if (content) config.selectors.content = content;
+        if (images) config.selectors.images = images;
+    }
+    
+    // Add authentication
+    if (document.getElementById('authSection').classList.contains('hidden') === false) {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginUrl = document.getElementById('loginUrl').value;
+        
+        if (username && password && loginUrl) {
+            config.auth = {
+                type: 'login',
+                username,
+                password,
+                login_url: loginUrl
+            };
+        }
+    }
+    
+    // Start the job
+    try {
+        const response = await fetch('/api/v1/scraper/scrape', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            currentJobId = result.job_id;
+            showResultsSection();
+            startJobPolling();
+            showNotification('Scraping started!', 'success');
+        } else {
+            showNotification('Failed to start scraping: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to start scraping', 'error');
+    }
+}
+
+// Show results section
+function showResultsSection() {
+    document.getElementById('resultsSection').classList.remove('hidden');
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Start job polling
+function startJobPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    pollingInterval = setInterval(async () => {
+        if (!currentJobId) return;
+        
+        try {
+            const response = await fetch(`/api/v1/scraper/jobs/${currentJobId}`);
+            const job = await response.json();
+            
+            if (job.success) {
+                updateJobStatus(job.job);
+                
+                if (job.job.status === 'completed') {
+                    clearInterval(pollingInterval);
+                    await loadJobResults();
+                    showNotification('Scraping completed successfully!', 'success');
+                } else if (job.job.status === 'failed') {
+                    clearInterval(pollingInterval);
+                    showNotification('Scraping failed: ' + job.job.error, 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error polling job:', error);
+        }
+    }, 2000);
+}
+
+// Update job status
+function updateJobStatus(job) {
+    // Update status badge
+    const badge = document.getElementById('statusBadge');
+    badge.className = `job-status status-${job.status}`;
+    badge.textContent = job.status.charAt(0).toUpperCase() + job.status.slice(1);
+    
+    // Update progress
+    let progress = 0;
+    if (job.status === 'running') progress = 50;
+    if (job.status === 'completed') progress = 100;
+    
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressText').textContent = progress + '%';
+    
+    // Update duration
+    if (job.started_at && job.completed_at) {
+        const duration = new Date(job.completed_at) - new Date(job.started_at);
+        document.getElementById('jobDuration').textContent = `Duration: ${(duration / 1000).toFixed(1)}s`;
+    }
+    
+    // Update data size
+    if (job.result && job.result.data) {
+        const size = JSON.stringify(job.result.data).length;
+        document.getElementById('dataSize').textContent = formatBytes(size);
+    }
+}
+
+// Load job results
+async function loadJobResults() {
+    try {
+        const response = await fetch(`/api/v1/scraper/jobs/${currentJobId}`);
+        const job = await response.json();
+        
+        if (job.success && job.job.result) {
+            scrapedData = job.job.result.data;
+            displayResults(scrapedData);
+        }
+    } catch (error) {
+        console.error('Error loading results:', error);
+    }
+}
+
+// Display results
+function displayResults(data) {
+    // Overview tab
+    const overview = document.getElementById('overviewContent');
+    overview.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <h4 class="font-semibold mb-2">Page Information</h4>
+                <p><strong>Title:</strong> ${data.title || 'N/A'}</p>
+                <p><strong>URL:</strong> <a href="${data.url}" target="_blank" class="text-purple-600">${data.url}</a></p>
+                <p><strong>Scraped:</strong> ${new Date(data.scraped_at).toLocaleString()}</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">Statistics</h4>
+                <p><strong>Headings:</strong> ${data.headings ? data.headings.length : 0}</p>
+                <p><strong>Paragraphs:</strong> ${data.paragraphs ? data.paragraphs.length : 0}</p>
+                <p><strong>Links:</strong> ${data.links ? data.links.length : 0}</p>
+                <p><strong>Images:</strong> ${data.images ? data.images.length : 0}</p>
+            </div>
+        </div>
+    `;
+    
+    // Content tab
+    const content = document.getElementById('contentPreview');
+    if (data.paragraphs && data.paragraphs.length > 0) {
+        content.innerHTML = data.paragraphs.map(p => `<p class="mb-4">${p}</p>`).join('');
+    } else {
+        content.innerHTML = '<p class="text-gray-500">No content found</p>';
+    }
+    
+    // Images tab
+    const images = document.getElementById('imageGrid');
+    if (data.images && data.images.length > 0) {
+        images.innerHTML = data.images.map(img => `
+            <div class="border rounded-lg overflow-hidden">
+                <img src="${img.src}" alt="${img.alt}" class="w-full h-32 object-cover">
+                <div class="p-2">
+                    <p class="text-xs truncate">${img.alt || 'No alt text'}</p>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        images.innerHTML = '<p class="text-gray-500 col-span-3">No images found</p>';
+    }
+    
+    // Links tab
+    const links = document.getElementById('linksList');
+    if (data.links && data.links.length > 0) {
+        links.innerHTML = data.links.map(link => `
+            <div class="flex justify-between items-center p-2 border rounded">
+                <a href="${link.url}" target="_blank" class="text-purple-600 hover:underline truncate">${link.text || link.url}</a>
+                <span class="text-xs text-gray-500">${link.url}</span>
+            </div>
+        `).join('');
+    } else {
+        links.innerHTML = '<p class="text-gray-500">No links found</p>';
+    }
+    
+    // Raw data tab
+    const raw = document.getElementById('jsonPreview');
+    raw.textContent = JSON.stringify(data, null, 2);
+}
+
+// Switch tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+}
+
+// Download results
+async function downloadResults(format) {
+    if (!currentJobId) {
+        showNotification('No job to download', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/scraper/jobs/${currentJobId}/download?format=${format}`);
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scraped_data_${currentJobId}.${format}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showNotification(`Downloaded as ${format.toUpperCase()}`, 'success');
+        } else {
+            showNotification('Download failed', 'error');
+        }
+    } catch (error) {
+        showNotification('Download failed', 'error');
+    }
+}
+
+// Load stats
+async function loadStats() {
+    try {
+        const response = await fetch('/api/v1/scraper/monitoring/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+            const stats = result.stats;
+            document.getElementById('activeJobs').textContent = stats.active_jobs || 0;
+            document.getElementById('completedJobs').textContent = stats.recent_jobs_24h || 0;
+            document.getElementById('successRate').textContent = (100 - (stats.error_rate || 0)) + '%';
+            document.getElementById('totalScraped').textContent = stats.total_jobs || 0;
+            
+            document.getElementById('successRateStat').textContent = (100 - (stats.error_rate || 0)) + '%';
+            document.getElementById('avgDurationStat').textContent = (stats.avg_duration || 0).toFixed(1) + 's';
+            document.getElementById('jobsTodayStat').textContent = stats.recent_jobs_24h || 0;
+            document.getElementById('errorRateStat').textContent = (stats.error_rate || 0) + '%';
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// Load recent jobs
+async function loadRecentJobs() {
+    try {
+        const response = await fetch('/api/v1/scraper/jobs?limit=10');
+        const result = await response.json();
+        
+        if (result.success) {
+            const jobsList = document.getElementById('recentJobsList');
+            if (result.jobs.length > 0) {
+                jobsList.innerHTML = result.jobs.map(job => `
+                    <div class="p-3 border rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="job-status status-${job.status}">${job.status}</span>
+                            <span class="text-xs text-gray-500">${new Date(job.created_at).toLocaleTimeString()}</span>
+                        </div>
+                        <p class="text-sm mt-1 truncate">${job.url}</p>
+                    </div>
+                `).join('');
+            } else {
+                jobsList.innerHTML = '<p class="text-gray-500 text-sm">No recent jobs</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading recent jobs:', error);
+    }
+}
+
+// Start monitoring
+function startMonitoring() {
+    // Update stats every 30 seconds
+    setInterval(() => {
+        loadStats();
+        loadRecentJobs();
+    }, 30000);
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Format bytes
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+</script>
+{% endblock %}

@@ -1,0 +1,426 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard - Smart Web Scraper Suite{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Here's what's happening with your scraping projects today.{% endblock %}
+
+{% block content %}
+<style>
+.period-btn.active {
+  background: #06B6D4;
+  color: #0F172A;
+  border-color: #06B6D4;
+  font-weight: 600;
+}
+</style>
+<!-- Stats Row -->
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: stretch; margin-bottom: 1.5rem;">
+    <div class="stat-card border-cyan fade-in-up fade-in-up-1" style="height: 100%; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;">
+        <div class="stat-icon" style="background: rgba(0, 212, 255, 0.2); color: var(--accent-cyan);">
+            <i class="bi bi-globe2"></i>
+        </div>
+        <div class="stat-value" id="total-scrapes" style="font-size: 2rem; font-weight: 700;">0</div>
+        <div class="stat-label" style="font-size: 0.85rem; color: #94A3B8;">Total Scrapes</div>
+    </div>
+    <div class="stat-card border-emerald fade-in-up fade-in-up-2" style="height: 100%; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald);">
+            <i class="bi bi-activity"></i>
+        </div>
+        <div class="stat-value" id="active-jobs" style="font-size: 2rem; font-weight: 700;">0</div>
+        <div class="stat-label" style="font-size: 0.85rem; color: #94A3B8;">Active Jobs</div>
+    </div>
+    <div class="stat-card border-amber fade-in-up fade-in-up-3" style="height: 100%; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--accent-amber);">
+            <i class="bi bi-bar-chart"></i>
+        </div>
+        <div class="stat-value" id="seo-analyses" style="font-size: 2rem; font-weight: 700;">0</div>
+        <div class="stat-label" style="font-size: 0.85rem; color: #94A3B8;">SEO Analyses</div>
+    </div>
+    <div class="stat-card border-purple fade-in-up fade-in-up-4" style="height: 100%; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;">
+        <div class="stat-icon" style="background: rgba(124, 58, 237, 0.2); color: var(--accent-purple);">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-value" id="success-rate" style="font-size: 2rem; font-weight: 700;">0%</div>
+        <div class="stat-label" style="font-size: 0.85rem; color: #94A3B8;">Success Rate</div>
+    </div>
+</div>
+
+<!-- Charts and Actions Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card-soft fade-in-up fade-in-up-5">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="card-title mb-1">Scrape Performance</h3>
+                        <p id="chart-subtitle" class="card-subtitle text-muted mb-0" style="color: #94A3B8 !important; opacity: 1 !important; font-size: 0.85rem;">Last 7 days</p>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-light period-btn active" data-period="7days">7 Days</button>
+                        <button class="btn btn-outline-light period-btn" data-period="30days">30 Days</button>
+                        <button class="btn btn-outline-light period-btn" data-period="90days">90 Days</button>
+                    </div>
+                </div>
+                <div style="height: 200px; position: relative;">
+                    <canvas id="performance-chart" style="min-height:250px;width:100%"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-soft fade-in-up fade-in-up-6">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4">Quick Actions</h3>
+                <div class="d-grid gap-3">
+                    <button class="btn btn-gradient-cyan" onclick="window.location.href='/data-scraper'" style="height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search me-2"></i>
+                        New Scrape Job
+                    </button>
+                    <button class="btn btn-gradient-amber" onclick="window.location.href='/seo-analyzer'" style="height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-graph-up me-2"></i>
+                        SEO Analyze
+                    </button>
+                    <button class="btn btn-gradient-orange" onclick="window.location.href='/price-tracker'" style="height: 44px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #F97316, #EA580C); border: none; color: white; transition: all 0.2s ease;" onmouseover="this.style.opacity='0.85'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(249,115,22,0.4)';" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <i class="bi bi-tag me-2"></i>
+                        Track Price
+                    </button>
+                    <button class="btn btn-outline-dark" onclick="window.location.href='/settings'" style="height: 44px; display: flex; align-items: center; justify-content: center; background: #374151; border: 1px solid #4B5563; color: white; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#374151'; this.style.transform='translateY(0)';">
+                        <i class="bi bi-gear me-2"></i>
+                        Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;margin-top:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="color:#FFFFFF;font-size:1rem;font-weight:600;margin:0;">Recent Activity</h3>
+        <span style="color:#94A3B8;font-size:0.8rem;">Last 10 actions</span>
+    </div>
+    <div id="activity-list"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let currentStats = null;
+let performanceChart = null;
+
+// Load dashboard stats on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardStats();
+    
+    // Initialize chart with server data
+    initializeChart();
+    
+    // Auto-refresh every 60 seconds
+    setInterval(loadDashboardStats, 60000);
+    
+    // Period toggle buttons
+    document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const period = this.dataset.period;
+            
+            // Update subtitle text
+            const subtitleMap = {
+                '7days': 'Last 7 days',
+                '30days': 'Last 30 days',
+                '90days': 'Last 90 days'
+            };
+            document.getElementById('chart-subtitle').textContent = 
+                subtitleMap[period];
+            
+            // Update chart data
+            if (currentStats && currentStats.performance) {
+                updatePerformanceChart(currentStats.performance[period]);
+            }
+        });
+    });
+});
+
+// CRASH-PROOF: Main function to load dashboard stats
+async function loadDashboardStats() {
+    try {
+        console.log('Loading dashboard stats...');
+        const res = await fetch('/dashboard/stats');
+        
+        if (!res.ok) {
+            throw new Error('HTTP ' + res.status + ': ' + res.statusText);
+        }
+        
+        const data = await res.json();
+        console.log('Dashboard stats loaded:', data);
+        
+        // Store current stats for period switching
+        currentStats = data;
+        
+        // CRASH-PROOF: Safely update each card with fallback to 0
+        const totalScrapesEl = document.getElementById('total-scrapes');
+        const activeJobsEl = document.getElementById('active-jobs');
+        const seoAnalysesEl = document.getElementById('seo-analyses');
+        const successRateEl = document.getElementById('success-rate');
+        
+        if (totalScrapesEl) totalScrapesEl.textContent = data.total_scrapes_today ?? 0;
+        if (activeJobsEl) activeJobsEl.textContent = data.active_jobs ?? 0;
+        if (seoAnalysesEl) seoAnalysesEl.textContent = data.seo_analyses ?? 0;
+        if (successRateEl) successRateEl.textContent = (data.success_rate ?? 0).toFixed(1) + '%';
+        
+        // Update chart with real data
+        if (data.performance && data.performance['7days']) {
+            updatePerformanceChart(data.performance['7days']);
+        }
+        
+        // Render recent activity
+        if (data.recent_activity) {
+            renderRecentActivity(data.recent_activity);
+        }
+        
+    } catch (error) {
+        console.error('Dashboard load error:', error);
+        
+        // CRASH-PROOF: Show 0 instead of "Error"
+        ['total-scrapes', 'active-jobs', 'seo-analyses'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '0';
+        });
+        
+        const sr = document.getElementById('success-rate');
+        if (sr) sr.textContent = '0%';
+        
+        // Show empty activity
+        renderRecentActivity([]);
+    }
+}
+
+// Initialize chart with server data
+function initializeChart() {
+    const ctx = document.getElementById('performance-chart');
+    if (!ctx) {
+        console.error('Canvas #performance-chart not found!');
+        return;
+    }
+    
+    // Get chart data from server
+    const rawData = {{ chart_data|safe }};
+    
+    if (!rawData) {
+        console.log('No chart data available');
+        return;
+    }
+    
+    // Destroy existing chart if any
+    if (window.perfChart) {
+        window.perfChart.destroy();
+    }
+    
+    window.perfChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: rawData.labels,
+            datasets: [
+                {
+                    label: 'Successful Scrapes',
+                    data: rawData.successful,
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0,212,255,0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#00d4ff',
+                    pointRadius: 5,
+                },
+                {
+                    label: 'Failed',
+                    data: rawData.failed,
+                    borderColor: '#ef4444', 
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ef4444',
+                    pointRadius: 5,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0,
+                        color: '#64748b',
+                        callback: function(value) {
+                            return Number.isInteger(value) 
+                                ? value : null;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.05)'
+                    }
+                },
+                x: {
+                    ticks: { color: '#64748b' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+}
+
+// Update performance chart with real data
+function updatePerformanceChart(data) {
+    const ctx = document.getElementById('performance-chart');
+    if (!ctx) {
+        console.error('Canvas #performance-chart not found!');
+        return;
+    }
+    
+    // Destroy existing chart if any
+    if (window.perfChart) {
+        window.perfChart.destroy();
+    }
+    
+    if (!data || data.length === 0) {
+        console.log('No performance data available');
+        return;
+    }
+    
+    const labels = data.map(d => {
+        const date = new Date(d.date);
+        return date.toLocaleDateString('en-IN', {month:'short', day:'numeric'});
+    });
+    
+    window.perfChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Successful Scrapes',
+                    data: data.map(d => d.successful),
+                    borderColor: '#06B6D4',
+                    backgroundColor: 'rgba(6,182,212,0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#06B6D4',
+                },
+                {
+                    label: 'Failed',
+                    data: data.map(d => d.failed),
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#EF4444',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#94A3B8' }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#64748B' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                y: {
+                    ticks: { color: '#64748B' },
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Render recent activity
+function renderRecentActivity(activities) {
+    const el = document.getElementById('activity-list');
+    if (!el) return;
+    
+    if (!activities || activities.length === 0) {
+        el.innerHTML = `
+            <div style="text-align:center;padding:30px;color:#94A3B8;">
+                <div style="font-size:32px;margin-bottom:8px;">📋</div>
+                <p style="color:#E2E8F0;margin:0 0 4px;">No activity yet</p>
+                <p style="font-size:0.8rem;margin:0;">Start scraping to see activity here</p>
+            </div>`;
+        return;
+    }
+    
+    el.innerHTML = activities.map(activity => {
+        // Use icon from backend or fallback
+        const icon = activity.icon || (() => {
+            const iconMap = {
+                'price_tracker': '🏷️',
+                'seo_analyzer': '📊',
+                'data_scraper': '🌐'
+            };
+            return iconMap[activity.type] || '📋';
+        })();
+        
+        // Status styling
+        const statusClass = activity.status === 'success' ? 'success' : 
+                           activity.status === 'failed' ? 'failed' : 'pending';
+        const statusColor = activity.status === 'success' ? '#10B981' : 
+                           activity.status === 'failed' ? '#F43F5E' : '#F59E0B';
+        
+        return `
+            <div class="activity-row" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span class="activity-icon" style="font-size:18px;">${icon}</span>
+                <span class="activity-desc" style="flex:1;min-width:0;color:#E2E8F0;font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    ${activity.description || 'Unknown activity'}
+                </span>
+                <span class="activity-time" style="color:#94A3B8;font-size:0.75rem;flex-shrink:0;">
+                    ${activity.time_ago || 'Unknown time'}
+                </span>
+                <span class="activity-status ${statusClass}" style="background:${activity.status === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(244,63,94,0.15)'};color:${statusColor};padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;flex-shrink:0;">
+                    ${activity.status || 'unknown'}
+                </span>
+            </div>`;
+    }).join('');
+}
+
+// Animate stat cards on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.fade-in-up').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+});
+</script>
+{% endblock %}

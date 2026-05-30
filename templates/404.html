@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | Smart Web Scraper Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0F1117;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background elements */
+        .bg-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .floating-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(135deg, #00D4FF, #7C3AED);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-dot:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-dot:nth-child(2) { top: 60%; left: 20%; animation-delay: 1s; }
+        .floating-dot:nth-child(3) { top: 30%; left: 70%; animation-delay: 2s; }
+        .floating-dot:nth-child(4) { top: 80%; left: 80%; animation-delay: 3s; }
+        .floating-dot:nth-child(5) { top: 10%; left: 50%; animation-delay: 4s; }
+        .floating-dot:nth-child(6) { top: 70%; left: 40%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Spider web illustration */
+        .spider-web {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 0;
+            opacity: 0.1;
+            animation: webPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes webPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.1; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
+        }
+
+        /* Main content container */
+        .container {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        /* 404 text with gradient */
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00D4FF, #7C3AED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 16px;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        /* Title */
+        .title {
+            color: #FFFFFF;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* Subtitle */
+        .subtitle {
+            color: #94A3B8;
+            font-size: 1rem;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        /* Button container */
+        .button-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Go Home button */
+        .btn-home {
+            background: linear-gradient(135deg, #00D4FF, #0099BB);
+            color: #000;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, #00E5FF, #00B8D4);
+        }
+
+        /* Go Back button */
+        .btn-back {
+            background: transparent;
+            color: #94A3B8;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        /* Small text below */
+        .help-text {
+            color: #64748B;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive design */
+        @media (max-width: 640px) {
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-home,
+            .btn-back {
+                width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <div class="floating-dot"></div>
+        <div class="floating-dot"></div>
+        <div class="floating-dot"></div>
+        <div class="floating-dot"></div>
+        <div class="floating-dot"></div>
+        <div class="floating-dot"></div>
+    </div>
+
+    <!-- Spider web illustration -->
+    <svg class="spider-web" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="webGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:0.3" />
+                <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:0.3" />
+            </linearGradient>
+        </defs>
+        <!-- Web lines -->
+        <line x1="100" y1="100" x2="100" y2="10" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="190" y2="100" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="100" y2="190" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="10" y2="100" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="150" y2="50" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="150" y2="150" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="50" y2="150" stroke="url(#webGradient)" stroke-width="1"/>
+        <line x1="100" y1="100" x2="50" y2="50" stroke="url(#webGradient)" stroke-width="1"/>
+        
+        <!-- Circular web lines -->
+        <circle cx="100" cy="100" r="30" fill="none" stroke="url(#webGradient)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="url(#webGradient)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#webGradient)" stroke-width="1"/>
+        
+        <!-- Center spider -->
+        <circle cx="100" cy="100" r="5" fill="url(#webGradient)"/>
+    </svg>
+
+    <!-- Main content -->
+    <div class="container">
+        <div class="error-code">404</div>
+        <h1 class="title">Page Not Found</h1>
+        <p class="subtitle">Looks like this page got scraped away!</p>
+        
+        <div class="button-container">
+            <a href="/dashboard" class="btn-home">
+                � Go Home
+            </a>
+            <button onclick="history.back()" class="btn-back">
+                ← Go Back
+            </button>
+        </div>
+        
+        <p class="help-text">Or try searching for what you need</p>
+    </div>
+</body>
+</html>

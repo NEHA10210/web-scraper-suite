@@ -1,0 +1,7 @@
+URL: https://example.com
+Title: Example Domain
+Scraped: 2026-04-11T16:16:40.659260
+Words: 17
+============================================================
+
+Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations.

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Web Scraper Suite{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Compact Professional Header -->
+<div class="mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-display text-balance">Welcome back</h1>
+            <p class="text-body mt-1">Here's what's happening with your scraping tasks today.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button class="btn-primary">
+                <i class="fas fa-plus mr-2"></i>
+                New Task
+            </button>
+            <button class="btn-secondary">
+                <i class="fas fa-download mr-2"></i>
+                Export
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-caption font-medium text-primary-500 uppercase tracking-wide">Products Tracked</p>
+                <p class="text-display mt-1">247</p>
+                <div class="flex items-center mt-2">
+                    <i class="fas fa-arrow-up text-success-500 text-xs mr-1"></i>
+                    <p class="text-caption text-success-600">12% from last week</p>
+                </div>
+            </div>
+            <div class="w-12 h-12 bg-success-50 rounded-lg flex items-center justify-center">
+                <i class="fas fa-tag text-success-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-caption font-medium text-primary-500 uppercase tracking-wide">SEO Analyses</p>
+                <p class="text-display mt-1">89</p>
+                <div class="flex items-center mt-2">
+                    <i class="fas fa-arrow-up text-warning-500 text-xs mr-1"></i>
+                    <p class="text-caption text-warning-600">8% from last week</p>
+                </div>
+            </div>
+            <div class="w-12 h-12 bg-warning-50 rounded-lg flex items-center justify-center">
+                <i class="fas fa-search text-warning-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-caption font-medium text-primary-500 uppercase tracking-wide">Data Extracted</p>
+                <p class="text-display mt-1">1.2GB</p>
+                <div class="flex items-center mt-2">
+                    <i class="fas fa-arrow-up text-info-500 text-xs mr-1"></i>
+                    <p class="text-caption text-info-600">15% from last week</p>
+                </div>
+            </div>
+            <div class="w-12 h-12 bg-info-50 rounded-lg flex items-center justify-center">
+                <i class="fas fa-database text-info-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-caption font-medium text-primary-500 uppercase tracking-wide">Success Rate</p>
+                <p class="text-display mt-1">98.5%</p>
+                <div class="flex items-center mt-2">
+                    <div class="status-dot status-online mr-2"></div>
+                    <p class="text-caption text-success-600">Excellent</p>
+                </div>
+            </div>
+            <div class="w-12 h-12 bg-accent-50 rounded-lg flex items-center justify-center">
+                <i class="fas fa-chart-line text-accent-600"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Recent Activity -->
+    <div class="lg:col-span-2">
+        <div class="card">
+            <div class="p-6 border-b border-primary-200">
+                <h2 class="text-title">Recent Activity</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-success-50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check text-success-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-body font-medium text-primary-900">Price tracking completed</p>
+                            <p class="text-caption text-primary-500">Amazon product - iPhone 15 Pro</p>
+                        </div>
+                        <p class="text-caption text-primary-500">2m ago</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-warning-50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-warning-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-body font-medium text-primary-900">SEO analysis warning</p>
+                            <p class="text-caption text-primary-500">Website timeout detected</p>
+                        </div>
+                        <p class="text-caption text-primary-500">15m ago</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-info-50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-download text-info-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-body font-medium text-primary-900">Data exported</p>
+                            <p class="text-caption text-primary-500">245 records to CSV</p>
+                        </div>
+                        <p class="text-caption text-primary-500">1h ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div>
+        <div class="card">
+            <div class="p-6 border-b border-primary-200">
+                <h2 class="text-title">Quick Actions</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    <a href="/smart-image-scraper" class="btn-primary w-full justify-center">
+                        <i class="fas fa-images mr-2"></i>
+                        Smart Image Scraper
+                    </a>
+                    <a href="{{ url_for('price_tracker.page') }}" class="btn-secondary w-full justify-center">
+                        <i class="fas fa-tag mr-2"></i>
+                        Track Product Price
+                    </a>
+                    <a href="{{ url_for('seo_analyzer.page') }}" class="btn-secondary w-full justify-center">
+                        <i class="fas fa-search mr-2"></i>
+                        Analyze SEO
+                    </a>
+                    <a href="/professional-scraper" class="btn-secondary w-full justify-center">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        Professional Scraper (FIXED)
+                    </a>
+                    <a href="/clean-content-scraper" class="btn-ghost w-full justify-center border border-primary-200">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        Clean Content Scraper
+                    </a>
+                    <a href="/enhanced-text-scraper-fixed" class="btn-ghost w-full justify-center border border-primary-200">
+                        <i class="fas fa-brain mr-2"></i>
+                        Enhanced Text Scraper (Fixed)
+                    </a>
+                    <a href="{{ url_for('data_scraper.page') }}" class="btn-ghost w-full justify-center border border-primary-200">
+                        <i class="fas fa-database mr-2"></i>
+                        Basic Data Scraper
+                    </a>
+                    {% if pro_scraper_enabled %}
+                    <a href="/data-scraper-pro" class="btn-ghost w-full justify-center border border-primary-200">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Professional Scraper
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Overview -->
+<div class="card">
+    <div class="p-6 border-b border-primary-200">
+        <div class="flex items-center justify-between">
+            <h2 class="text-title">Performance Overview</h2>
+            <select class="input w-32 text-sm">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 3 months</option>
+            </select>
+        </div>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-success-50 rounded-full mb-4">
+                    <i class="fas fa-check-circle text-success-600 text-2xl"></i>
+                </div>
+                <p class="text-display text-success-600">1,234</p>
+                <p class="text-body text-primary-600 mt-1">Successful Tasks</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-warning-50 rounded-full mb-4">
+                    <i class="fas fa-clock text-warning-600 text-2xl"></i>
+                </div>
+                <p class="text-display text-warning-600">23</p>
+                <p class="text-body text-primary-600 mt-1">Pending Tasks</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-danger-50 rounded-full mb-4">
+                    <i class="fas fa-exclamation-circle text-danger-600 text-2xl"></i>
+                </div>
+                <p class="text-display text-danger-600">5</p>
+                <p class="text-body text-primary-600 mt-1">Failed Tasks</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

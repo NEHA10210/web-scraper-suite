@@ -1,0 +1,1172 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+
+<style>
+.profile-card {
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s, 
+                box-shadow 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.profile-card:hover {
+    border-color: rgba(0,212,255,0.2);
+    box-shadow: 0 8px 32px rgba(0,212,255,0.05);
+}
+
+.profile-card h3 {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    border-color: rgba(0,212,255,0.5);
+}
+
+.btn-save {
+    height: 42px;
+    padding: 0 24px;
+    background: linear-gradient(135deg, #00d4ff, #0ea5e9);
+    border: none;
+    border-radius: 8px;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,212,255,0.4);
+}
+
+.btn-danger {
+    height: 42px;
+    padding: 0 24px;
+    background: transparent;
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+    color: #ef4444;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: rgba(239,68,68,0.1);
+    transform: translateY(-1px);
+}
+
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes ringRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.tab-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.tab-btn:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+}
+
+.tab-btn.active {
+    background: rgba(0,212,255,0.15);
+    border: 1px solid rgba(0,212,255,0.3);
+    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+}
+
+.tab-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.tab-btn:hover::after {
+    opacity: 1;
+}
+
+.tab-panel {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.toast.success { background: #166534; border:1px solid #22c55e; }
+.toast.error { background: #7f1d1d; border:1px solid #ef4444; }
+.toast.info { background: #1e3a8a; border:1px solid #3b82f6; }
+
+/* Toggle switch styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle-slider::after {
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: 0.3s;
+  content: '';
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: #00d4ff;
+}
+
+.toggle-switch input:not(:checked) + .toggle-slider {
+  background: rgba(255,255,255,0.1);
+}
+
+.toggle-switch input:checked + .toggle-slider::after {
+  left: 22px;
+}
+
+.toggle-switch input:not(:checked) + .toggle-slider::after {
+  left: 2px;
+}
+
+/* Status badge styles */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.status-badge.on {
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+  border-color: rgba(34,197,94,0.3);
+}
+
+.status-badge.off {
+  background: rgba(100,116,139,0.1);
+  color: #64748b;
+  border-color: rgba(100,116,139,0.2);
+}
+</style>
+
+
+<!-- Page header with tab bar -->
+<div style="
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+">
+        <!-- Left: title -->
+        <div>
+            <h1 style="color:white;font-size:24px;
+                       font-weight:700;margin:0 0 4px;">
+                Settings
+            </h1>
+            <p style="color:#64748b;margin:0;
+                      font-size:14px;">
+                Manage your account preferences 
+                and scraping configuration
+            </p>
+        </div>
+
+        <!-- Right: tab icons -->
+        <div style="
+            display: flex;
+            gap: 4px;
+            padding: 6px;
+            background: #1e293b;
+            border-radius: 12px;
+        ">
+            <button class="tab-btn active"
+                    onclick="switchTab('profile', this)"
+                    title="Profile Settings">👤</button>
+            <button class="tab-btn"
+                    onclick="switchTab('appearance', this)"
+                    title="Appearance">🎨</button>
+            <button class="tab-btn"
+                    onclick="switchTab('general', this)"
+                    title="General Settings">⚙️</button>
+            <button class="tab-btn"
+                    onclick="switchTab('notifications', this)"
+                    title="Notifications">🔔</button>
+            <button class="tab-btn"
+                    onclick="switchTab('security', this)"
+                    title="Security">🔒</button>
+            <button class="tab-btn"
+                    onclick="switchTab('privacy', this)"
+                    title="Privacy">🛡️</button>
+            <button class="tab-btn"
+                    onclick="switchTab('danger', this)"
+                    title="Danger Zone">⚠️</button>
+        </div>
+    </div>
+
+  <!-- TAB 1: PROFILE SETTINGS -->
+  <div id="tab-profile" class="tab-panel">
+    <div class="profile-card">
+      <h3>👤 Profile Settings</h3>
+      
+      <!-- Centered avatar with click to change -->
+      <div style="text-align:center; margin-bottom:28px;">
+        <div style="
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+        " onclick="changeAvatar()">
+          <!-- Glowing ring -->
+          <div style="
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: linear-gradient(
+              135deg,#00d4ff,#7c3aed,#00d4ff
+            );
+            background-size: 200% 200%;
+            animation: ringRotate 3s linear infinite;
+          "></div>
+          <!-- Avatar -->
+          <div id="avatarCircle" style="
+            position: relative;
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(
+              135deg,#00d4ff,#7c3aed
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            font-weight: 700;
+            border: 3px solid #1e293b;
+            z-index: 1;
+          ">{{ user.name[0].upper() }}</div>
+          <!-- Hover overlay -->
+          <div style="
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 2;
+          " class="avatar-overlay">📷</div>
+        </div>
+        <div style="
+          color: #00d4ff;
+          font-size: 12px;
+          margin-top: 10px;
+          cursor: pointer;
+        " onclick="changeAvatar()">
+          Click to change photo
+        </div>
+      </div>
+
+      <!-- Name and Email fields -->
+      <div style="
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      ">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input"
+                 id="inputName"
+                 value="{{ user.name }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            Email Address
+          </label>
+          <input type="email" class="form-input"
+                 id="inputEmail"
+                 value="{{ user.email }}">
+        </div>
+      </div>
+
+      <div style="
+        margin: 16px 0 0;
+      ">
+        <button class="btn-save" 
+                onclick="saveProfile()">
+          💾 Save Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: APPEARANCE -->
+  <div id="tab-appearance" class="tab-panel" 
+       style="display:none;">
+    <div class="profile-card">
+      <h3>🎨 Appearance</h3>
+      <p style="color:#64748b;font-size:14px;">
+        Theme and display preferences 
+        (coming soon)
+      </p>
+      <!-- Placeholder theme options -->
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 12px;
+        margin-top: 16px;
+      ">
+        <div style="
+          padding: 16px;
+          border-radius: 10px;
+          border: 2px solid #00d4ff;
+          background: rgba(0,212,255,0.05);
+          text-align: center;
+          cursor: pointer;
+        ">
+          <div style="font-size:24px;">🌙</div>
+          <div style="color:white;
+                      font-size:13px;
+                      margin-top:8px;">
+            Dark (Current)
+          </div>
+        </div>
+        <div style="
+          padding: 16px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.1);
+          text-align: center;
+          cursor: pointer;
+          opacity: 0.5;
+        ">
+          <div style="font-size:24px;">☀️</div>
+          <div style="color:#94a3b8;
+                      font-size:13px;
+                      margin-top:8px;">
+            Light (Soon)
+          </div>
+        </div>
+        <div style="
+          padding: 16px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.1);
+          text-align: center;
+          cursor: pointer;
+          opacity: 0.5;
+        ">
+          <div style="font-size:24px;">🌊</div>
+          <div style="color:#94a3b8;
+                      font-size:13px;
+                      margin-top:8px;">
+            Ocean (Soon)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: GENERAL SETTINGS -->
+  <div id="tab-general" class="tab-panel"
+       style="display:none;">
+    <div class="profile-card">
+      <h3>⚙️ General Settings</h3>
+      <!-- Toggles -->
+      <div style="
+        display:flex;
+        flex-direction:column;
+        gap:16px;
+      ">
+        {% for label, desc, checked in [
+          ('Auto-refresh dashboard', 
+           'Refresh stats every 30 seconds',
+           True),
+          ('Show scrape notifications',
+           'Show popup when scrape completes',
+           True),
+          ('Compact table view',
+           'Show more rows with less spacing',
+           False),
+        ] %}
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          padding:14px 16px;
+          background:rgba(255,255,255,0.03);
+          border-radius:10px;
+          border:1px solid rgba(255,255,255,0.06);
+        ">
+          <div>
+            <div style="color:white;
+                        font-size:14px;
+                        font-weight:500;">
+              {{ label }}
+            </div>
+            <div style="color:#64748b;
+                        font-size:12px;
+                        margin-top:2px;">
+              {{ desc }}
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" 
+                   {{ 'checked' if checked }}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: NOTIFICATIONS -->
+  <div id="tab-notifications" class="tab-panel"
+       style="display:none;">
+    <div class="profile-card">
+      <h3>🔔 Notifications</h3>
+      <div style="
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+      ">
+        {% for label, desc, checked in [
+          ('Price drop alerts',
+           'Email when tracked price drops',
+           True),
+          ('Price increase alerts',
+           'Email when tracked price increases',
+           True),
+          ('Scrape complete',
+           'Email when scrape job finishes',
+           False),
+          ('Weekly summary',
+           'Weekly email digest of activity',
+           False),
+        ] %}
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          padding:14px 16px;
+          background:rgba(255,255,255,0.03);
+          border-radius:10px;
+          border:1px solid rgba(255,255,255,0.06);
+        ">
+          <div>
+            <div style="color:white;
+                        font-size:14px;">
+              {{ label }}
+            </div>
+            <div style="color:#64748b;
+                        font-size:12px;">
+              {{ desc }}
+            </div>
+          </div>
+          <div class="status-badge {{ 'on' if checked else 'off' }}">
+            {{ 'ON' if checked else 'OFF' }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: SECURITY -->
+  <div id="tab-security" class="tab-panel"
+       style="display:none;">
+    <div class="profile-card">
+        <h3>🔒 Change Password</h3>
+        
+        <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <div style="
+                display: flex;
+                align-items: center;
+                background: #1E293B;
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                padding: 0 14px;
+                gap: 10px;
+            ">
+                <input 
+                    type="password" 
+                    id="currentPw"
+                    placeholder="Enter current password"
+                    style="
+                        flex: 1;
+                        background: transparent;
+                        border: none;
+                        outline: none;
+                        color: #E2E8F0;
+                        font-size: 0.95rem;
+                        padding: 14px 0;
+                    "
+                >
+                <span 
+                    onclick="togglePassword('currentPw', 'eyeIconCurrent')"
+                    style="
+                        cursor: pointer;
+                        color: #64748B;
+                        font-size: 18px;
+                        padding: 4px;
+                        user-select: none;
+                    "
+                    id="eyeIconCurrent"
+                >👁️</span>
+            </div>
+        </div>
+        <div style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        ">
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    background: #1E293B;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    padding: 0 14px;
+                    gap: 10px;
+                ">
+                    <input 
+                        type="password" 
+                        id="newPw"
+                        placeholder="Min. 6 characters"
+                        style="
+                            flex: 1;
+                            background: transparent;
+                            border: none;
+                            outline: none;
+                            color: #E2E8F0;
+                            font-size: 0.95rem;
+                            padding: 14px 0;
+                        "
+                    >
+                    <span 
+                        onclick="togglePassword('newPw', 'eyeIconNew')"
+                        style="
+                            cursor: pointer;
+                            color: #64748B;
+                            font-size: 18px;
+                            padding: 4px;
+                            user-select: none;
+                        "
+                        id="eyeIconNew"
+                    >👁️</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    background: #1E293B;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    padding: 0 14px;
+                    gap: 10px;
+                ">
+                    <input 
+                        type="password" 
+                        id="confirmPw"
+                        placeholder="Repeat new password"
+                        style="
+                            flex: 1;
+                            background: transparent;
+                            border: none;
+                            outline: none;
+                            color: #E2E8F0;
+                            font-size: 0.95rem;
+                            padding: 14px 0;
+                        "
+                    >
+                    <span 
+                        onclick="togglePassword('confirmPw', 'eyeIconConfirm')"
+                        style="
+                            cursor: pointer;
+                            color: #64748B;
+                            font-size: 18px;
+                            padding: 4px;
+                            user-select: none;
+                        "
+                        id="eyeIconConfirm"
+                    >👁️</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Password strength indicator -->
+        <div style="margin-bottom:16px;">
+            <div style="
+                height: 4px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 2px;
+                overflow: hidden;
+            ">
+                <div id="pwStrengthBar" style="
+                    height: 100%;
+                    width: 0%;
+                    border-radius: 2px;
+                    transition: all 0.3s;
+                    background: #ef4444;
+                "></div>
+            </div>
+            <div id="pwStrengthText" style="
+                color:#64748b;
+                font-size:11px;
+                margin-top:4px;
+            "></div>
+        </div>
+        
+        <button class="btn-save" onclick="changePassword()">
+            🔑 Update Password
+        </button>
+    </div>
+  </div>
+
+  <!-- TAB 6: PRIVACY -->
+  <div id="tab-privacy" class="tab-panel"
+       style="display:none;">
+    <div class="profile-card">
+      <h3>🛡️ Privacy</h3>
+      <div style="
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+      ">
+        {% for label, desc in [
+          ('Data collection',
+           'We only store data you create'),
+          ('Export your data',
+           'Download all your scraped data'),
+          ('Cookie preferences',
+           'Only essential cookies used'),
+        ] %}
+        <div style="
+          padding:14px 16px;
+          background:rgba(255,255,255,0.03);
+          border-radius:10px;
+          border:1px solid rgba(255,255,255,0.06);
+        ">
+          <div style="color:white;font-size:14px;">
+            {{ label }}
+          </div>
+          <div style="color:#64748b;font-size:12px;
+                      margin-top:2px;">
+            {{ desc }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: DANGER ZONE -->
+  <div id="tab-danger" class="tab-panel"
+       style="display:none;">
+    <div class="profile-card" style="
+        border-color: rgba(239,68,68,0.2);
+    ">
+        <h3 style="color:#ef4444;">
+            ⚠️ Danger Zone
+        </h3>
+        
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(239,68,68,0.05);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: 10px;
+        ">
+            <div>
+                <div style="color:white;font-size:14px;
+                            font-weight:600;">
+                    Delete Account
+                </div>
+                <div style="color:#64748b;font-size:12px;
+                            margin-top:2px;">
+                    Permanently delete your account 
+                    and all data. This cannot be undone.
+                </div>
+            </div>
+            <button 
+                class="btn-danger"
+                onclick="showDeleteModal()"
+                style="flex-shrink:0;margin-left:16px;"
+            >
+                🗑️ Delete Account
+            </button>
+        </div>
+    </div>
+  </div>
+
+<!-- Add script for data attributes -->
+<script>
+// Set data attributes for JavaScript access
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.dataset.totalScrapes = '{{ total_scrapes }}';
+    document.body.dataset.totalTracked = '{{ total_tracked }}';
+    document.body.dataset.totalSeo = '{{ total_seo }}';
+});
+</script>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: #1e293b;
+        border: 1px solid rgba(239,68,68,0.3);
+        border-radius: 16px;
+        padding: 32px;
+        width: 90%;
+        max-width: 420px;
+        text-align: center;
+    ">
+        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+        <h3 style="color:white;font-size:20px;margin:0 0 8px;">
+            Delete Account?
+        </h3>
+        <p style="color:#94a3b8;font-size:14px;margin:0 0 24px;">
+            This will permanently delete your account,
+            all scrape jobs, tracked products, and 
+            SEO analyses. This cannot be undone.
+        </p>
+        
+        <div class="form-group" style="text-align:left;">
+            <label class="form-label">
+                Enter your password to confirm:
+            </label>
+            <div style="
+                display: flex;
+                align-items: center;
+                background: #1E293B;
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                padding: 0 14px;
+                gap: 10px;
+            ">
+                <input 
+                    type="password"
+                    id="deleteConfirmPw"
+                    placeholder="Your password"
+                    style="
+                        flex: 1;
+                        background: transparent;
+                        border: none;
+                        outline: none;
+                        color: #E2E8F0;
+                        font-size: 0.95rem;
+                        padding: 14px 0;
+                    "
+                >
+                <span 
+                    onclick="togglePassword('deleteConfirmPw', 'eyeIconDelete')"
+                    style="
+                        cursor: pointer;
+                        color: #64748B;
+                        font-size: 18px;
+                        padding: 4px;
+                        user-select: none;
+                    "
+                    id="eyeIconDelete"
+                >👁️</span>
+            </div>
+        </div>
+        
+        <div style="
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        ">
+            <button 
+                onclick="closeDeleteModal()"
+                style="
+                    flex: 1;
+                    height: 42px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 14px;
+                "
+            >Cancel</button>
+            <button 
+                onclick="deleteAccount()"
+                style="
+                    flex: 1;
+                    height: 42px;
+                    background: #ef4444;
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 700;
+                    cursor: pointer;
+                    font-size: 14px;
+                "
+            >Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Tab switching
+function switchTab(name, btn) {
+    // Hide all panels
+    document.querySelectorAll('.tab-panel')
+        .forEach(p => p.style.display = 'none');
+    
+    // Remove active from all buttons
+    document.querySelectorAll('.tab-btn')
+        .forEach(b => b.classList.remove('active'));
+    
+    // Show selected panel
+    document.getElementById(`tab-${name}`)
+        .style.display = 'block';
+    
+    // Mark button active
+    btn.classList.add('active');
+}
+
+// Avatar hover effect
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarContainer = document.querySelector('[onclick="changeAvatar()"]');
+    if (avatarContainer) {
+        avatarContainer.addEventListener('mouseenter', function() {
+            const overlay = this.querySelector('.avatar-overlay');
+            if (overlay) overlay.style.opacity = '1';
+        });
+        avatarContainer.addEventListener('mouseleave', function() {
+            const overlay = this.querySelector('.avatar-overlay');
+            if (overlay) overlay.style.opacity = '0';
+        });
+    }
+});
+
+function changeAvatar() {
+    // For now just show a toast
+    showToast('Avatar upload coming soon!', 'info');
+}
+
+// Show toast
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : type === 'info' ? 'ℹ️ ' : '❌ ') + msg;
+    t.className = `toast ${type}`;
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+// Animate stats numbers
+function animateCount(el, target, duration=1000) {
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+            el.textContent = target;
+            clearInterval(timer);
+        } else {
+            el.textContent = Math.floor(start);
+        }
+    }, 16);
+}
+
+// Apply to banner stats on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stats on load
+    const scrapesEl = document.getElementById('statScrapes');
+    const trackedEl = document.getElementById('statTracked');
+    const seoEl = document.getElementById('statSeo');
+    
+    // Get values from data attributes
+    const totalScrapes = parseInt(document.body.dataset.totalScrapes || '0');
+    const totalTracked = parseInt(document.body.dataset.totalTracked || '0');
+    const totalSeo = parseInt(document.body.dataset.totalSeo || '0');
+    
+    if (scrapesEl) animateCount(scrapesEl, totalScrapes);
+    if (trackedEl) animateCount(trackedEl, totalTracked);
+    if (seoEl) animateCount(seoEl, totalSeo);
+});
+
+// Save profile
+async function saveProfile() {
+    const name = document.getElementById('inputName').value;
+    const email = document.getElementById('inputEmail').value;
+    
+    try {
+        const res = await fetch('/settings/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, email})
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            showToast('Profile saved successfully!', 'success');
+            // Update sidebar name too
+            const sidebarUsername = document.querySelector('.sidebar-username');
+            if (sidebarUsername) {
+                sidebarUsername.textContent = name;
+            }
+            // Update display
+            // Update display elements if they exist
+            const displayName = document.getElementById('displayName');
+            const displayEmail = document.getElementById('displayEmail');
+            const avatarCircle = document.getElementById('avatarCircle');
+            
+            if (displayName) displayName.textContent = name;
+            if (displayEmail) displayEmail.textContent = email;
+            if (avatarCircle) avatarCircle.textContent = name[0].toUpperCase();
+        } else {
+            showToast('Failed to save: ' + data.error, 'error');
+        }
+    } catch(e) {
+        showToast('Error saving profile', 'error');
+    }
+}
+
+// Change password
+async function changePassword() {
+    const current = document.getElementById('currentPw').value;
+    const newPw = document.getElementById('newPw').value;
+    const confirm = document.getElementById('confirmPw').value;
+    
+    try {
+        const res = await fetch('/profile/change-password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                current_password: current,
+                new_password: newPw,
+                confirm_password: confirm
+            })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            showToast(data.message);
+            document.getElementById('currentPw').value = '';
+            document.getElementById('newPw').value = '';
+            document.getElementById('confirmPw').value = '';
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) {
+        showToast('Failed to update password', 'error');
+    }
+}
+
+// Password strength meter
+document.getElementById('newPw')
+    .addEventListener('input', function() {
+    const pw = this.value;
+    const bar = document.getElementById('pwStrengthBar');
+    const txt = document.getElementById('pwStrengthText');
+    
+    let strength = 0;
+    if (pw.length >= 6) strength++;
+    if (pw.length >= 10) strength++;
+    if (/[A-Z]/.test(pw)) strength++;
+    if (/[0-9]/.test(pw)) strength++;
+    if (/[^A-Za-z0-9]/.test(pw)) strength++;
+    
+    const levels = [
+        {w:'0%', c:'#ef4444', t:''},
+        {w:'25%', c:'#ef4444', t:'Weak'},
+        {w:'50%', c:'#f59e0b', t:'Fair'},
+        {w:'75%', c:'#00d4ff', t:'Good'},
+        {w:'100%', c:'#22c55e', t:'Strong'},
+    ];
+    
+    const l = levels[Math.min(strength, 4)];
+    bar.style.width = l.w;
+    bar.style.background = l.c;
+    txt.textContent = l.t;
+    txt.style.color = l.c;
+});
+
+// Delete account modal
+function showDeleteModal() {
+    const m = document.getElementById('deleteModal');
+    m.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    document.getElementById('deleteConfirmPw').value = '';
+}
+
+async function deleteAccount() {
+    const pw = document.getElementById('deleteConfirmPw').value;
+    
+    if (!pw) {
+        showToast('Enter your password', 'error');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/profile/delete-account', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({password: pw})
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            window.location.href = '/login';
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) {
+        showToast('Failed to delete account', 'error');
+    }
+}
+
+// Close delete modal on backdrop click
+document.getElementById('deleteModal')
+    .addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+// Password toggle function
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+        // Revealing password → show eye-off icon
+        input.type = 'text';
+        icon.textContent = '👁️‍🗨️';
+    } else {
+        // Hiding password → show eye icon
+        input.type = 'password';
+        icon.textContent = '👁️';
+    }
+}
+</script>
+
+{% endblock %}

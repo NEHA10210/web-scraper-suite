@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraper Suite - Professional Web Scraping Toolkit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --accent-cyan: #06B6D4;
+            --accent-purple: #6366F1;
+            --text-primary: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* NAVBAR */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15,23,42,0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-cyan {
+            background: var(--accent-cyan);
+            color: white;
+        }
+
+        .btn-cyan:hover {
+            background: #0891B2;
+            transform: translateY(-2px);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(6,182,212,0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            color: var(--accent-cyan);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #06B6D4, #6366F1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subheading {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--bg-primary);
+        }
+
+        .btn-white:hover {
+            background: #F8FAFC;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 4rem;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .stat:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 40px;
+            background: var(--border-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* FEATURES SECTION */
+        .features {
+            padding: 6rem 2rem;
+            padding-bottom: 80px;
+            background: var(--bg-secondary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-card.popular {
+            border-color: var(--accent-cyan);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-cyan);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon-orange { background: rgba(251,146,60,0.2); }
+        .icon-cyan { background: rgba(6,182,212,0.2); }
+        .icon-purple { background: rgba(99,102,241,0.2); }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .learn-more {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* HOW IT WORKS */
+        .how-it-works {
+            padding: 6rem 2rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            position: relative;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+        }
+
+        .step-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+        }
+
+        /* TECH STACK */
+        .tech-stack {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 2rem;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .tech-badge:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-cyan);
+        }
+
+        /* CTA BANNER */
+        .cta-banner {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #6366F1, #06B6D4);
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .btn-white-large {
+            background: white;
+            color: #6366F1;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-white-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--bg-primary);
+            padding: 3rem 2rem 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-buttons {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .stat:not(:last-child)::after {
+                display: none;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        /* HAMBURGER MENU */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: var(--text-primary);
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-buttons.active {
+                display: flex;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-primary);
+                flex-direction: column;
+                padding: 2rem;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">🌐 Scraper Suite</a>
+            <div class="nav-buttons" id="navButtons">
+                <a href="/login" class="btn btn-outline">Login</a>
+                <a href="/signup" class="btn btn-cyan">Get Started Free</a>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div>
+            <div class="badge">✨ Professional Web Scraping Toolkit</div>
+            <h1>
+                Scrape <span class="gradient-text">Smarter</span>.<br>
+                Track Prices.<br>
+                Analyze SEO.
+            </h1>
+            <p class="subheading">
+                All-in-one web scraping suite with Price Tracker, SEO Analyzer, and Data Scraper. 
+                Built for developers.
+            </p>
+            <div class="hero-buttons">
+                <a href="/signup" class="btn btn-cyan btn-large">🚀 Get Started Free</a>
+                <a href="/login" class="btn btn-white btn-large">▶ View Demo</a>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" data-target="26">0</div>
+                    <div class="stat-label">Scrapes Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" data-target="6">0</div>
+                    <div class="stat-label">SEO Reports Generated</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" data-target="3">0</div>
+                    <div class="stat-label">Products Tracked</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2 class="section-title">Everything You Need</h2>
+                <p class="section-subtitle">Three powerful tools in one dashboard</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon icon-orange">📊</div>
+                    <h3 class="feature-title">SEO Analyzer</h3>
+                    <p class="feature-description">
+                        Analyze any website's SEO score, meta tags, headings, links and get actionable 
+                        recommendations instantly.
+                    </p>
+                    <ul class="feature-list">
+                        <li>SEO Score out of 100</li>
+                        <li>Meta tag analysis</li>
+                        <li>Keyword density</li>
+                        <li>Page speed insights</li>
+                    </ul>
+                    <a href="#" class="learn-more">Learn More →</a>
+                </div>
+
+                <div class="feature-card popular fade-in-up">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="feature-icon icon-cyan">🏷️</div>
+                    <h3 class="feature-title">Price Tracker</h3>
+                    <p class="feature-description">
+                        Track product prices on Amazon, Flipkart and more. Get alerted when prices 
+                        drop to your target.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Multi-platform support</li>
+                        <li>Price history charts</li>
+                        <li>Target price alerts</li>
+                        <li>Hourly/Daily tracking</li>
+                    </ul>
+                    <a href="#" class="learn-more">Learn More →</a>
+                </div>
+
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon icon-purple">🌐</div>
+                    <h3 class="feature-title">Data Scraper</h3>
+                    <p class="feature-description">
+                        Extract text, images, links and structured data from any website. Export to 
+                        CSV or JSON instantly.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Text & image extraction</li>
+                        <li>Link harvesting</li>
+                        <li>CSV & JSON export</li>
+                        <li>Dynamic page support</li>
+                    </ul>
+                    <a href="#" class="learn-more">Learn More →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in 3 simple steps</p>
+            </div>
+            <div class="steps">
+                <div class="step fade-in-up">
+                    <div class="step-number" style="background: var(--accent-cyan);">1</div>
+                    <div class="step-icon">🔗</div>
+                    <h3 class="step-title">Enter URL</h3>
+                    <p class="step-description">
+                        Paste any website URL you want to scrape or analyze
+                    </p>
+                </div>
+
+                <div class="step fade-in-up">
+                    <div class="step-number" style="background: var(--accent-purple);">2</div>
+                    <div class="step-icon">⚙️</div>
+                    <h3 class="step-title">Configure & Run</h3>
+                    <p class="step-description">
+                        Choose scrape type, set frequency and hit go
+                    </p>
+                </div>
+
+                <div class="step fade-in-up">
+                    <div class="step-number" style="background: #10B981;">3</div>
+                    <div class="step-icon">📥</div>
+                    <h3 class="step-title">Get Results</h3>
+                    <p class="step-description">
+                        View data instantly and export in your preferred format
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="tech-stack">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2 class="section-title">Built With</h2>
+            </div>
+            <div class="tech-badges">
+                <div class="tech-badge fade-in-up">🐍 Python</div>
+                <div class="tech-badge fade-in-up">⚗️ Flask</div>
+                <div class="tech-badge fade-in-up">🗄️ SQLite</div>
+                <div class="tech-badge fade-in-up">🍜 BeautifulSoup</div>
+                <div class="tech-badge fade-in-up">📊 Chart.js</div>
+                <div class="tech-badge fade-in-up">🎨 JavaScript</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="cta-banner">
+        <div class="container">
+            <div class="fade-in-up">
+                <h2 class="cta-title">Ready to Start Scraping?</h2>
+                <p class="cta-subtitle">Join now and get access to all tools free</p>
+                <a href="/signup" class="btn-white-large">Get Started Now →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">🌐 Scraper Suite</div>
+                <div style="color: var(--text-secondary);">Built with ❤️ using Python & Flask</div>
+            </div>
+            <div class="footer-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/price-tracker">Price Tracker</a>
+                <a href="/seo-analyzer">SEO Analyzer</a>
+                <a href="/data-scraper">Data Scraper</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Scraper Suite. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navButtons = document.getElementById('navButtons');
+
+        hamburger.addEventListener('click', () => {
+            navButtons.classList.toggle('active');
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 30);
+        }
+
+        // Trigger counter animation when stats are visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+                    const target = parseInt(entry.target.dataset.target);
+                    animateCounter(entry.target, target);
+                    entry.target.classList.add('counted');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-number').forEach(el => {
+            statsObserver.observe(el);
+        });
+
+        // Typewriter effect for hero headline
+        const heroTitle = document.querySelector('.hero h1');
+        const text = heroTitle.innerHTML;
+        heroTitle.innerHTML = '';
+        let index = 0;
+
+        function typeWriter() {
+            if (index < text.length) {
+                heroTitle.innerHTML = text.slice(0, index + 1);
+                index++;
+                setTimeout(typeWriter, 50);
+            }
+        }
+
+        // Start typewriter effect after page load
+        window.addEventListener('load', () => {
+            setTimeout(typeWriter, 500);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

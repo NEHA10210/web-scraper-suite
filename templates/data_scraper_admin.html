@@ -1,0 +1,826 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Data Scraper - Smart Web Scraper Suite{% endblock %}
+{% block page_title %}Data Scraper{% endblock %}
+{% block page_subtitle %}Extract any data from any website with powerful scraping capabilities.{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+    
+    <!-- LEFT PANEL: Scrape Configuration -->
+    <div>
+        <div style="background:rgba(255,255,255,0.03);
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:12px; padding:24px;">
+          
+          <h2 style="color:#FFFFFF;font-size:1.1rem;
+            font-weight:600;margin:0 0 6px;">
+            Scrape Website
+          </h2>
+          <p style="color:#94A3B8;font-size:0.875rem;
+            margin:0 0 20px;">
+            Extract any data from any website
+          </p>
+          
+          <!-- URL Input -->
+          <label style="color:#E2E8F0;font-size:0.875rem;
+            font-weight:500;display:block;margin-bottom:8px;">
+            Website URL
+          </label>
+          <input type="text" id="scrape-url" 
+            placeholder="https://example.com"
+            style="width:100%;background:#1E2433;
+            color:#FFFFFF;border:1px solid rgba(255,255,255,0.15);
+            border-radius:8px;padding:12px 16px;
+            font-size:0.9rem;margin-bottom:16px;
+            box-sizing:border-box;">
+          
+          <!-- Scrape Type -->
+          <label style="color:#E2E8F0;font-size:0.875rem;
+            font-weight:500;display:block;margin-bottom:8px;">
+            What to Extract
+          </label>
+          <select id="scrape-type" 
+            style="width:100%;background:#1E2433;
+            color:#FFFFFF;border:1px solid rgba(255,255,255,0.15);
+            border-radius:8px;padding:12px 16px;
+            font-size:0.9rem;margin-bottom:16px;
+            box-sizing:border-box;cursor:pointer;">
+            <option value="text">Text & Headings</option>
+            <option value="links">All Links</option>
+            <option value="images">Images</option>
+            <option value="emails">Email Addresses</option>
+            <option value="meta">Meta Tags & SEO Data</option>
+            <option value="all">Everything (Full Scrape)</option>
+          </select>
+          
+          <!-- Dynamic Scraping Toggle -->
+          <div style="display:flex;align-items:center;
+            gap:12px;margin-bottom:20px;padding:12px;
+            background:rgba(255,255,255,0.02);
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:8px;">
+            <input type="checkbox" id="use-playwright" 
+              style="width:16px;height:16px;cursor:pointer;">
+            <div>
+              <div style="color:#E2E8F0;font-size:0.875rem;
+                font-weight:500;">
+                Dynamic Scraping
+              </div>
+              <div style="color:#94A3B8;font-size:0.75rem;">
+                Enable for JS-heavy sites (React, Vue, Angular)
+              </div>
+            </div>
+            <span style="margin-left:auto;background:rgba(0,212,255,0.1);
+              color:#00D4FF;padding:2px 8px;border-radius:20px;
+              font-size:0.7rem;font-weight:600;">
+              Playwright
+            </span>
+          </div>
+          
+          <!-- Start Button -->
+          <button id="scrape-btn" onclick="startScraping()"
+            style="width:100%;padding:14px;
+            background:linear-gradient(135deg,#00D4FF,#0099BB);
+            color:#000000;border:none;border-radius:8px;
+            font-size:0.95rem;font-weight:600;cursor:pointer;
+            transition:all 0.2s;">
+            ▶ Start Scraping
+          </button>
+        </div>
+        
+        <!-- Recent Jobs below form -->
+        <div style="margin-top:16px;background:rgba(255,255,255,0.03);
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:12px;padding:24px;">
+          <div style="display: flex; align-items: center; 
+            justify-content: space-between; 
+            flex-wrap: wrap; gap: 12px; 
+            margin-bottom: 16px;">
+            <h3 style="margin: 0; color:#FFFFFF;font-size:0.95rem;
+              font-weight:600;">
+              Recent Jobs
+            </h3>
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+              <a href="/data-scraper/export/all/csv"
+                 style="display:inline-flex;align-items:center;
+                        gap:8px;padding:10px 20px;
+                        background:rgba(16,185,129,0.15);
+                        border:1px solid rgba(16,185,129,0.3);
+                        color:#10B981;border-radius:8px;
+                        text-decoration:none;font-size:0.875rem;
+                        font-weight:600;cursor:pointer;
+                        transition:all 0.2s;
+                        width: auto; white-space: nowrap;"
+                 onmouseover="this.style.background='rgba(16,185,129,0.25)'"
+                 onmouseout="this.style.background='rgba(16,185,129,0.15)'">
+                📥 Export All Jobs CSV
+              </a>
+              <button onclick="exportAllJobsPDF()"
+                      style="display:inline-flex;align-items:center;
+                             gap:8px;padding:10px 20px;
+                             background:rgba(244,63,94,0.15);
+                             border:1px solid rgba(244,63,94,0.3);
+                             color:#F43F5E;border-radius:8px;
+                             font-size:0.875rem;font-weight:600;
+                             cursor:pointer;transition:all 0.2s;
+                             width: auto; white-space: nowrap;"
+                      onmouseover="this.style.background='rgba(244,63,94,0.25)'"
+                      onmouseout="this.style.background='rgba(244,63,94,0.15)'">
+                📄 Export All Jobs PDF
+              </button>
+            </div>
+          </div>
+          <div id="jobs-list">
+            <div style="text-align:center;padding:20px;
+              color:#94A3B8;font-size:0.875rem;">
+              No jobs yet
+            </div>
+          </div>
+        </div>
+    </div>
+    
+    <!-- RIGHT PANEL: Results -->
+    <div>
+        <div id="results-placeholder" 
+          style="background:rgba(255,255,255,0.03);
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:12px;padding:48px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:16px;">🌐</div>
+          <p style="color:#E2E8F0;font-size:1.1rem;
+            font-weight:500;margin:0 0 8px;">
+            Ready to Scrape
+          </p>
+          <p style="color:#94A3B8;font-size:0.875rem;margin:0;">
+            Enter a URL and select what to extract
+          </p>
+        </div>
+        
+        <div id="results-content" style="display:none;">
+          
+          <!-- Results Header -->
+          <div style="background:rgba(255,255,255,0.03);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:12px;padding:20px;margin-bottom:16px;
+            display:flex;align-items:center;
+            justify-content:space-between;">
+            <div>
+              <div style="color:#FFFFFF;font-weight:600;
+                font-size:1rem;" id="result-url">—</div>
+              <div style="color:#94A3B8;font-size:0.8rem;
+                margin-top:4px;" id="result-meta">—</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="exportData()" 
+                style="padding:8px 16px;
+                background:rgba(0,212,255,0.1);
+                color:#00D4FF;border:1px solid rgba(0,212,255,0.3);
+                border-radius:6px;font-size:0.8rem;cursor:pointer;">
+                ↓ Export JSON
+              </button>
+              <button onclick="copyData()"
+                style="padding:8px 16px;
+                background:rgba(255,255,255,0.05);
+                color:#E2E8F0;border:1px solid rgba(255,255,255,0.1);
+                border-radius:6px;font-size:0.8rem;cursor:pointer;">
+                Copy
+              </button>
+            </div>
+          </div>
+          
+          <!-- Tabs for different data types -->
+          <div id="result-tabs" style="display:flex;gap:8px;
+            margin-bottom:16px;flex-wrap:wrap;"></div>
+          
+          <!-- Data Display -->
+          <div id="result-data" style="background:rgba(255,255,255,0.03);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:12px;padding:20px;
+            max-height:500px;overflow-y:auto;">
+          </div>
+          
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function startScraping() {
+  const url = document.getElementById('scrape-url').value.trim();
+  const type = document.getElementById('scrape-type').value;
+  const playwright = document.getElementById('use-playwright').checked;
+  
+  if (!url || !url.startsWith('http')) {
+    showToast('Please enter a valid URL', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('scrape-btn');
+  btn.disabled = true;
+  btn.innerHTML = '⟳ Scraping...';
+  btn.style.opacity = '0.7';
+  
+  document.getElementById('results-placeholder').style.display = 'none';
+  document.getElementById('results-content').style.display = 'none';
+  
+  // Show loading skeleton
+  document.getElementById('results-content').style.display = 'block';
+  document.getElementById('result-data').innerHTML = `
+    <div style="text-align:center;padding:40px;color:#94A3B8;">
+      <div style="font-size:24px;margin-bottom:12px;">⟳</div>
+      <div>Scraping ${url}...</div>
+      <div style="font-size:0.8rem;margin-top:8px;">
+        This may take 5-15 seconds for JS-heavy sites
+      </div>
+    </div>`;
+  
+  try {
+    const response = await fetch('/data-scraper/scrape', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url, scrape_type: type, 
+                           use_playwright: playwright})
+    });
+    
+    const data = await response.json();
+    console.log('Scrape result:', data);
+    
+    if (!data.success) {
+      showToast('Error: ' + (data.error || 'Scraping failed'), 'error');
+      document.getElementById('results-placeholder').style.display = 'block';
+      document.getElementById('results-content').style.display = 'none';
+      return;
+    }
+    
+    displayResults(data);
+    loadJobs();
+    showToast(`Scraped ${data.records_found} records!`, 'success');
+    
+  } catch(err) {
+    console.error(err);
+    showToast('Network error: ' + err.message, 'error');
+    document.getElementById('results-placeholder').style.display = 'block';
+    document.getElementById('results-content').style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '▶ Start Scraping';
+    btn.style.opacity = '1';
+  }
+}
+
+function displayResults(data) {
+  window._lastScrapeData = data;
+  
+  document.getElementById('result-url').textContent = data.url;
+  
+  // Show correct count for meta type
+  if (data.data && data.data.meta) {
+    document.getElementById('result-meta').textContent = 
+      `${Object.keys(data.data.meta || {}).length} meta tags found · ${data.duration_ms}ms`;
+  } else {
+    document.getElementById('result-meta').textContent = 
+      `${data.records_found} records found · ${data.duration_ms}ms`;
+  }
+  
+  const d = data.data;
+  const tabs = document.getElementById('result-tabs');
+  const content = document.getElementById('result-data');
+  tabs.innerHTML = '';
+  
+  // Build tabs based on available data
+  const sections = [];
+  
+  if (d.headings && d.headings.length > 0)
+    sections.push({key:'headings', 
+      label:`Headings (${d.headings.length})`});
+  if (d.paragraphs && d.paragraphs.length > 0)
+    sections.push({key:'paragraphs', 
+      label:`Text (${d.paragraphs.length})`});
+  if (d.links && d.links.length > 0)
+    sections.push({key:'links', 
+      label:`Links (${d.links.length})`});
+  if (d.images && d.images.length > 0)
+    sections.push({key:'images', 
+      label:`Images (${d.images.length})`});
+  if (d.emails && d.emails.length > 0)
+    sections.push({key:'emails', 
+      label:`Emails (${d.emails.length})`});
+  if (d.meta)
+    sections.push({key:'meta', label:'Meta Tags'});
+  
+  if (sections.length === 0) {
+    content.innerHTML = '<p style="color:#94A3B8;text-align:center;padding:20px;">No data extracted</p>';
+    return;
+  }
+  
+  // Create tab buttons
+  sections.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = s.label;
+    btn.style.cssText = `padding:6px 14px;border-radius:20px;
+      border:1px solid rgba(255,255,255,0.15);
+      background:${i===0?'rgba(0,212,255,0.15)':'rgba(255,255,255,0.05)'};
+      color:${i===0?'#00D4FF':'#94A3B8'};
+      font-size:0.8rem;cursor:pointer;`;
+    btn.onclick = () => showSection(s.key, data, btn);
+    tabs.appendChild(btn);
+  });
+  
+  // Show first section
+  showSection(sections[0].key, data, tabs.children[0]);
+}
+
+function showSection(key, data, activeBtn) {
+  // Update tab styles
+  document.querySelectorAll('#result-tabs button').forEach(b => {
+    b.style.background = 'rgba(255,255,255,0.05)';
+    b.style.color = '#94A3B8';
+  });
+  activeBtn.style.background = 'rgba(0,212,255,0.15)';
+  activeBtn.style.color = '#00D4FF';
+  
+  const d = data.data;
+  const content = document.getElementById('result-data');
+  
+  if (key === 'headings') {
+    content.innerHTML = d.headings.map(h => `
+      <div style="display:flex;gap:12px;align-items:baseline;
+        padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="background:rgba(0,212,255,0.1);color:#00D4FF;
+          padding:2px 8px;border-radius:4px;font-size:0.7rem;
+          font-weight:600;min-width:30px;text-align:center;">
+          ${h.level}
+        </span>
+        <span style="color:#E2E8F0;font-size:0.875rem;">
+          ${h.text}
+        </span>
+      </div>`).join('');
+  }
+  
+  else if (key === 'paragraphs') {
+    content.innerHTML = d.paragraphs.map((p,i) => `
+      <div style="padding:10px 0;
+        border-bottom:1px solid rgba(255,255,255,0.05);
+        color:#E2E8F0;font-size:0.875rem;line-height:1.6;">
+        <span style="color:#94A3B8;font-size:0.75rem;
+          margin-right:8px;">#${i+1}</span>
+        ${p}
+      </div>`).join('');
+  }
+  
+  else if (key === 'links') {
+    content.innerHTML = d.links.map(l => `
+      <div style="padding:10px 0;
+        border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;align-items:center;
+          justify-content:space-between;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="color:#E2E8F0;font-size:0.875rem;
+              font-weight:500;margin-bottom:3px;">
+              ${l.text}
+            </div>
+            <div style="color:#00D4FF;font-size:0.75rem;
+              overflow:hidden;text-overflow:ellipsis;
+              white-space:nowrap;opacity:0.7;">
+              ${l.url}
+            </div>
+          </div>
+          <a href="${l.url}" target="_blank"
+            style="color:#00D4FF;font-size:0.75rem;
+            text-decoration:none;white-space:nowrap;
+            padding:4px 10px;border:1px solid rgba(0,212,255,0.3);
+            border-radius:4px;flex-shrink:0;">
+            Visit ↗
+          </a>
+        </div>
+      </div>`).join('');
+  }
+  
+  else if (key === 'images') {
+    content.innerHTML = `<div style="display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+      gap:12px;">` +
+      d.images.map((img, index) => `
+        <div style="background:rgba(255,255,255,0.03);
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:8px;overflow:hidden;position:relative;
+          cursor:pointer;" onclick="window.open('${img.src}', '_blank')"
+          onmouseover="this.querySelector('.hover-overlay').style.display='flex'"
+          onmouseout="this.querySelector('.hover-overlay').style.display='none'">
+          <span style="position:absolute;top:4px;left:4px;
+            background:rgba(0,0,0,0.6);color:white;
+            font-size:0.65rem;padding:2px 5px;
+            border-radius:3px;z-index:2;">#${index+1}</span>
+          <div class="hover-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;
+            background:rgba(0,0,0,0.7);display:none;align-items:center;
+            justify-content:center;z-index:1;">
+            <span style="color:white;font-size:0.75rem;">Click to open</span>
+          </div>
+          <img src="${img.src}" alt="${img.alt}"
+            style="width:100%;height:90px;object-fit:cover;"
+            onerror="this.style.display='none'">
+          <div style="padding:6px 8px;${img.alt ? 'color:#E2E8F0;' : ''}font-size:0.7rem;overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap;">
+            ${img.alt ? img.alt : `<span style="background:rgba(244,63,94,0.15);
+              color:#F43F5E;font-size:0.65rem;padding:2px 6px;
+              border-radius:3px;">No alt text</span>`}
+          </div>
+        </div>`).join('') + '</div>';
+  }
+  
+  else if (key === 'emails') {
+    content.innerHTML = d.emails.length > 0 ?
+      d.emails.map(e => `
+        <div style="padding:8px 12px;margin-bottom:6px;
+          background:rgba(0,212,255,0.05);
+          border:1px solid rgba(0,212,255,0.15);
+          border-radius:6px;color:#00D4FF;
+          font-size:0.875rem;">
+          ${e}
+        </div>`).join('') :
+      '<p style="color:#94A3B8;text-align:center;padding:20px;">No emails found</p>';
+  }
+  
+  else if (key === 'meta') {
+    content.innerHTML = Object.entries(d.meta).map(([k,v]) => `
+      <div style="display:flex;gap:16px;padding:8px 0;
+        border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:#94A3B8;font-size:0.8rem;
+          min-width:140px;flex-shrink:0;">${k}</span>
+        <span style="color:#E2E8F0;font-size:0.8rem;">
+          ${String(v).substring(0,200)}
+        </span>
+      </div>`).join('');
+  }
+}
+
+function exportData() {
+  if (!window._lastScrapeData) return;
+  const json = JSON.stringify(window._lastScrapeData, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'scraped-data.json';
+  a.click();
+  showToast('Exported successfully!', 'success');
+}
+
+function copyData() {
+  if (!window._lastScrapeData) return;
+  navigator.clipboard.writeText(
+    JSON.stringify(window._lastScrapeData, null, 2));
+  showToast('Copied to clipboard!', 'success');
+}
+
+async function loadJobs() {
+  try {
+    const res = await fetch('/data-scraper/jobs');
+    const jobs = await res.json();
+    const el = document.getElementById('jobs-list');
+    
+    if (!jobs || jobs.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:0.875rem;">No jobs yet</div>';
+      return;
+    }
+    
+    // Group jobs by URL
+    const grouped = {};
+    jobs.forEach(job => {
+      if (!grouped[job.url]) {
+        grouped[job.url] = { 
+          url: job.url, 
+          lastScraped: job.created_at,
+          lastScrapedAgo: job.time_ago,
+          types: {} 
+        };
+      }
+      
+      const typeKey = job.scrape_type;
+      if (!grouped[job.url].types[typeKey]) {
+        grouped[job.url].types[typeKey] = {
+          type: job.scrape_type,
+          totalRecords: 0,
+          runs: 0,
+          latestJob: null
+        };
+      }
+      
+      grouped[job.url].types[typeKey].totalRecords += job.records_found;
+      grouped[job.url].types[typeKey].runs += 1;
+      
+      // Keep the latest job for export buttons
+      if (!grouped[job.url].types[typeKey].latestJob || 
+          new Date(job.created_at) > new Date(grouped[job.url].types[typeKey].latestJob.created_at)) {
+        grouped[job.url].types[typeKey].latestJob = job;
+      }
+    });
+    
+    // Render grouped cards
+    el.innerHTML = Object.values(grouped).map(group => {
+      const typeRows = Object.values(group.types).map(type => {
+        const job = type.latestJob;
+        const statusColor = job.status === 'completed' ? 
+          '#10B981' : job.status === 'failed' ? 
+          '#F43F5E' : '#F59E0B';
+          
+        return `
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;
+                      background:rgba(255,255,255,0.02);border-radius:6px;
+                      transition:background 0.2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+            <div style="color:#94A3B8;font-size:0.75rem;font-weight:500;min-width:40px;">
+              ${type.type}
+            </div>
+            <div style="color:${statusColor};font-size:0.75rem;font-weight:600;min-width:50px;text-align:center;">
+              ${type.totalRecords} records
+            </div>
+            <div style="color:#64748B;font-size:0.7rem;min-width:35px;text-align:center;">
+              ×${type.runs} runs
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px;">
+              <a href="/data-scraper/export/csv/${job.id}"
+                 style="display:inline-flex;align-items:center;
+                        gap:4px;padding:4px 8px;
+                        background:rgba(6,182,212,0.15);
+                        border:1px solid #06B6D4;
+                        color:#06B6D4;border-radius:4px;
+                        text-decoration:none;font-size:0.7rem;">
+                📥 CSV
+              </a>
+              <button onclick="exportJobPDF(${job.id}, '${job.url}', '${job.scrape_type}', ${job.records_found})"
+                      style="display:inline-flex;align-items:center;
+                             gap:4px;padding:4px 8px;
+                             background:rgba(239,68,68,0.15);
+                             border:1px solid #EF4444;
+                             color:#EF4444;border-radius:4px;
+                             font-size:0.7rem;cursor:pointer;">
+                📄 PDF
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      return `
+        <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.1);
+                    border-radius:10px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="color:#06B6D4;font-size:1rem;">🌐</span>
+            <div style="color:#E2E8F0;font-size:0.9rem;font-weight:600;flex:1;min-width:0;
+                        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              ${group.url.replace('https://','').replace('http://','')}
+            </div>
+          </div>
+          <div style="color:#94A3B8;font-size:0.75rem;margin-bottom:12px;">
+            Last scraped: ${group.lastScrapedAgo}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${typeRows}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    console.error('Jobs load error:', e);
+  }
+}
+
+// Load jobs on page load
+loadJobs();
+
+function showToast(msg, type) {
+  const colors = {
+    success: '#10B981',
+    error: '#F43F5E',
+    info: '#00D4FF'
+  };
+  const toast = document.createElement('div');
+  toast.style.cssText = `position:fixed;top:20px;right:20px;
+    z-index:9999;padding:12px 20px;border-radius:8px;
+    background:#1E2433;border-left:3px solid ${colors[type]||colors.info};
+    color:#E2E8F0;font-size:0.875rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    transition:opacity 0.3s;`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// Format datetime function (frontend version)
+function formatDateTime(raw) {
+    if (!raw || raw === 'null') return '—';
+    const clean = raw.split('.')[0].replace('T', ' ');
+    const date = new Date(clean);
+    if (isNaN(date.getTime())) return clean;
+    return date.toLocaleString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+    });
+}
+
+// PDF Export Functions
+async function exportJobPDF(jobId, url, scrapeType, recordsFound) {
+    try {
+        // Fetch job data
+        const response = await fetch(`/data-scraper/export/csv/${jobId}`);
+        const csvText = await response.text();
+        
+        // Parse CSV data
+        const lines = csvText.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+        const data = lines.slice(1).map(line => 
+            line.split(',').map(cell => cell.replace(/"/g, ''))
+        );
+        
+        // Generate PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Dark header bar
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, 210, 28, 'F');
+        
+        // App name
+        doc.setTextColor(0, 212, 255);  // cyan
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Scraper Suite', 14, 12);
+        
+        // Report title  
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.text('Scrape Report', 14, 20);
+        
+        // Date on right
+        doc.setFontSize(8);
+        doc.setTextColor(180, 180, 180);
+        doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 140, 20);
+        
+        // Report info
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.text(`Website: ${url}`, 14, 37);
+        doc.text(`Type: ${scrapeType}`, 14, 43);
+        doc.text(`Total Records: ${recordsFound}`, 14, 49);
+        
+        // Table
+        const tableData = data.map((row, index) => [
+            index + 1,
+            row[0] || '' // Data column
+        ]);
+        
+        doc.autoTable({
+            head: [['#', 'Data']],
+            body: tableData,
+            startY: 55,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [15, 23, 42],   // dark navy
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [30, 30, 30]
+            },
+            alternateRowStyles: {
+                fillColor: [240, 245, 255]  // light blue alternate
+            },
+            columnStyles: { 
+                0: { cellWidth: 15 }, 
+                1: { cellWidth: 'auto' } 
+            },
+            margin: { left: 14, right: 14 }
+        });
+        
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated by Smart Web Scraper Suite · Page ${i} of ${pageCount}`, 
+                     105, 285, { align: 'center' });
+        }
+        
+        doc.save(`scrape_report_${jobId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+    } catch (error) {
+        console.error('PDF export error:', error);
+        showToast('Failed to generate PDF', 'error');
+    }
+}
+
+async function exportAllJobsPDF() {
+    try {
+        // Fetch all jobs data
+        const response = await fetch('/data-scraper/export/all/csv');
+        const csvText = await response.text();
+        
+        // Parse CSV data
+        const lines = csvText.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+        const data = lines.slice(1).map(line => 
+            line.split(',').map(cell => cell.replace(/"/g, ''))
+        );
+        
+        // Calculate summary stats correctly
+        const totalRuns = data.reduce((sum, row) => sum + parseInt(row[3] || 0), 0); // sum of runs column
+        const uniqueUrls = new Set(data.map(row => row[0])).size;
+        const totalRecords = data.reduce((sum, row) => sum + parseInt(row[2] || 0), 0); // sum of records column
+        const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        
+        // Generate PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Dark header bar
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, 210, 28, 'F');
+        
+        // App name
+        doc.setTextColor(0, 212, 255);  // cyan
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Scraper Suite', 14, 12);
+        
+        // Report title  
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.text('All Scrape Jobs Report', 14, 20);
+        
+        // Date on right
+        doc.setFontSize(8);
+        doc.setTextColor(180, 180, 180);
+        doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 140, 20);
+        
+        // Summary box
+        doc.setFillColor(30, 41, 59);
+        doc.roundedRect(14, 30, 182, 18, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.text(`Total Runs: ${totalRuns}`, 20, 40);
+        doc.text(`Unique URLs: ${uniqueUrls}`, 65, 40);
+        doc.text(`Total Records: ${totalRecords}`, 110, 40);
+        doc.text(`Generated: ${today}`, 155, 40);
+        
+        // Table
+        doc.autoTable({
+            startY: 55,
+            head: [['URL', 'Type', 'Total Records', 'Runs', 'Last Scraped']],
+            body: data,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [15, 23, 42],   // dark navy
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [30, 30, 30]
+            },
+            alternateRowStyles: {
+                fillColor: [240, 245, 255]  // light blue alternate
+            },
+            columnStyles: {
+                0: { cellWidth: 70 },  // URL column wider
+                1: { cellWidth: 20 },  // Type
+                2: { cellWidth: 25, halign: 'center' },  // Total Records
+                3: { cellWidth: 15, halign: 'center' },  // Runs
+                4: { cellWidth: 45 }   // Last Scraped
+            },
+            margin: { left: 14, right: 14 }
+        });
+        
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated by Smart Web Scraper Suite · Page ${i} of ${pageCount}`, 
+                     105, 285, { align: 'center' });
+        }
+        
+        doc.save(`all_scrape_jobs_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+    } catch (error) {
+        console.error('PDF export error:', error);
+        showToast('Failed to generate PDF', 'error');
+    }
+}
+</script>
+{% endblock %}

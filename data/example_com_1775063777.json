@@ -1,0 +1,126 @@
+{
+  "metadata": {
+    "url": "https://example.com",
+    "title": "Example Domain",
+    "description": null,
+    "author": null,
+    "publish_date": null,
+    "language": "en",
+    "scraped_at": "2026-04-01T22:46:17.822358"
+  },
+  "content": {
+    "raw_text": "Example DomainThis domain is for use in documentation examples without needing permission. Avoid use in operations.Learn more",
+    "paragraphs": [
+      "This domain is for use in documentation examples without needing permission. Avoid use in operations."
+    ],
+    "headings": [
+      {
+        "level": 1,
+        "text": "Example Domain"
+      }
+    ],
+    "lists": []
+  },
+  "processed_text": "Example DomainThis domain is for use in documentation examples without needing permission. Avoid use in operations.Learn more",
+  "nlp_data": {
+    "word_count": 17,
+    "sentence_count": 3,
+    "unique_words": 15,
+    "avg_word_length": 6.411764705882353,
+    "most_common_words": [
+      [
+        "use",
+        2
+      ],
+      [
+        "in",
+        2
+      ],
+      [
+        "example",
+        1
+      ],
+      [
+        "domainthis",
+        1
+      ],
+      [
+        "domain",
+        1
+      ],
+      [
+        "is",
+        1
+      ],
+      [
+        "for",
+        1
+      ],
+      [
+        "documentation",
+        1
+      ],
+      [
+        "examples",
+        1
+      ],
+      [
+        "without",
+        1
+      ],
+      [
+        "needing",
+        1
+      ],
+      [
+        "permission",
+        1
+      ],
+      [
+        "avoid",
+        1
+      ],
+      [
+        "operations.learn",
+        1
+      ],
+      [
+        "more",
+        1
+      ]
+    ],
+    "tokens": [
+      "Example",
+      "DomainThis",
+      "domain",
+      "is",
+      "for",
+      "use",
+      "in",
+      "documentation",
+      "examples",
+      "without",
+      "needing",
+      "permission.",
+      "Avoid",
+      "use",
+      "in",
+      "operations.Learn",
+      "more"
+    ],
+    "sentences": [
+      "Example DomainThis domain is for use in documentation examples without needing permission",
+      "Avoid use in operations",
+      "Learn more"
+    ]
+  },
+  "statistics": {
+    "char_count": 125,
+    "char_count_no_spaces": 109,
+    "word_count": 17,
+    "sentence_count": 3,
+    "avg_word_length": 6.41,
+    "avg_sentence_length": 5.67,
+    "estimated_reading_time": 0.09
+  }
+}

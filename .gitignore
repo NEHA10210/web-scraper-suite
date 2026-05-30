@@ -1,0 +1,62 @@
+# Sensitive files
+.env
+.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/scraper_suite.db
+data/price_tracker.db
+scraper_jobs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Debug files
+debug_*.py
+check_db.py
+quick_test.py
+final_verification.py
+requirements_check.py
+
+# Test files
+test_*.py
+
+# Old/backup files
+*_old.*
+*_backup.*
+dashboard_old.html
+settings_old.html
+seo_analyzer_backup.html
+
+# Migration files
+migrate_*.py
+add_*.py
+fix_*.py
+
+# Data folder
+data/images/
+logs/
+*.log
+
+# Docker
+Dockerfile
+Dockerfile-advanced
+docker-compose*.yml
+
+# Extra files
+config_advanced.py
+requirements_advanced.txt
+requirements_fixed.txt
+README_ADVANCED.md
+README_PRO.md
+DYNAMIC_SCRAPING_GUIDE.md
+ENHANCED_SCRAPER_API_EXAMPLES.md
+QUICK_START.md
+REFACTORING_FIXES.md
+*_frontend_fix.js
+demo.py
+setup_*.py

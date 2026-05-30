@@ -1,0 +1,856 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+
+<style>
+.profile-card {
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s, 
+                box-shadow 0.3s;
+}
+
+.profile-card:hover {
+    border-color: rgba(0,212,255,0.2);
+    box-shadow: 0 8px 32px rgba(0,212,255,0.05);
+}
+
+.profile-card h3 {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #00d4ff, #7c3aed);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,212,255,0.3);
+}
+
+.btn-danger {
+    background: #ef4444;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+@keyframes ringRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success { background: #166534; border:1px solid #22c55e; }
+.toast.error { background: #7f1d1d; border:1px solid #ef4444; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+</style>
+
+<!-- HERO BANNER -->
+<div style="
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    height: 180px;
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e1b4b 25%,
+        #0c4a6e 50%,
+        #134e4a 75%,
+        #0f172a 100%
+    );
+">
+    <!-- Grid overlay -->
+    <div style="
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+            rgba(0,212,255,0.1) 1px,
+            transparent 1px
+        );
+        background-size: 30px 30px;
+    "></div>
+
+    <!-- Banner content -->
+    <div style="
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        padding: 20px 28px;
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        background: linear-gradient(
+            to top, rgba(15,23,42,0.9), transparent
+        );
+    ">
+        <!-- Glowing avatar -->
+        <div style="position:relative;flex-shrink:0;">
+            <div style="
+                position: absolute;
+                inset: -3px;
+                border-radius: 50%;
+                background: linear-gradient(
+                    135deg,#00d4ff,#7c3aed,#00d4ff
+                );
+                background-size: 300% 300%;
+                animation: ringRotate 3s linear infinite;
+            "></div>
+            <div style="
+                position: relative;
+                width: 80px; height: 80px;
+                border-radius: 50%;
+                background: linear-gradient(
+                    135deg,#00d4ff,#7c3aed
+                );
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+                border: 3px solid #0f172a;
+                z-index: 1;
+            ">{{ user.name[0].upper() }}</div>
+        </div>
+
+        <!-- Name + info -->
+        <div style="flex:1;">
+            <h2 style="
+                color:white;font-size:22px;
+                font-weight:800;margin:0 0 4px;
+            ">{{ user.name }}</h2>
+            <div style="color:rgba(255,255,255,0.6);
+                        font-size:13px;">
+                {{ user.email }}
+            </div>
+            <div style="color:rgba(255,255,255,0.4);
+                        font-size:12px;margin-top:2px;">
+                Member since 
+                {{ user.created_at[:10] 
+                   if user.created_at else 'N/A' }}
+            </div>
+        </div>
+
+        <!-- Quick stats -->
+        <div style="display:flex;gap:24px;
+                    padding-bottom:4px;">
+            <div style="text-align:center;">
+                <div id="statScrapes" style="
+                    color:#00d4ff;font-size:24px;
+                    font-weight:800;
+                ">0</div>
+                <div style="color:rgba(255,255,255,0.5);
+                            font-size:11px;">Scrapes</div>
+            </div>
+            <div style="width:1px;
+                        background:rgba(255,255,255,0.1);">
+            </div>
+            <div style="text-align:center;">
+                <div id="statTracked" style="
+                    color:#f59e0b;font-size:24px;
+                    font-weight:800;
+                ">0</div>
+                <div style="color:rgba(255,255,255,0.5);
+                            font-size:11px;">Tracked</div>
+            </div>
+            <div style="width:1px;
+                        background:rgba(255,255,255,0.1);">
+            </div>
+            <div style="text-align:center;">
+                <div id="statSeo" style="
+                    color:#8b5cf6;font-size:24px;
+                    font-weight:800;
+                ">0</div>
+                <div style="color:rgba(255,255,255,0.5);
+                            font-size:11px;">SEO</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 COLUMN LAYOUT -->
+<div style="
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+">
+    <!-- LEFT COLUMN -->
+    <div style="
+        display:flex;
+        flex-direction:column;
+        gap:16px;
+        position:sticky;
+        top:20px;
+        align-self:start;
+    ">
+        <!-- Avatar card -->
+        <div class="profile-card" 
+             style="text-align:center;">
+            <div style="
+                width:80px;height:80px;
+                border-radius:50%;
+                background:linear-gradient(
+                    135deg,#00d4ff,#7c3aed
+                );
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                color:white;
+                font-size:32px;
+                font-weight:700;
+                margin:0 auto 12px;
+                box-shadow:0 0 20px rgba(0,212,255,0.3);
+            ">{{ user.name[0].upper() }}</div>
+            
+            <div style="color:white;font-size:16px;
+                        font-weight:700;">
+                {{ user.name }}
+            </div>
+            <div style="color:#64748b;font-size:13px;
+                        margin-top:4px;">
+                {{ user.email }}
+            </div>
+                        <div style="
+                margin-top:14px;
+                padding-top:14px;
+                border-top:1px solid rgba(255,255,255,0.08);
+                color:#475569;font-size:12px;
+            ">
+                Member since<br>
+                <span style="color:#94a3b8;">
+                    {{ user.created_at[:10] 
+                       if user.created_at else 'N/A' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Stats card -->
+        <div class="profile-card">
+            <h3>📊 Your Stats</h3>
+            <div style="display:flex;
+                        flex-direction:column;gap:10px;">
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    padding:10px 14px;
+                    background:rgba(0,212,255,0.06);
+                    border-radius:8px;
+                ">
+                    <span style="color:#94a3b8;
+                                 font-size:13px;">
+                        🌐 Total Scrapes
+                    </span>
+                    <span style="color:#00d4ff;
+                                 font-weight:700;">
+                        {{ total_scrapes }}
+                    </span>
+                </div>
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    padding:10px 14px;
+                    background:rgba(245,158,11,0.06);
+                    border-radius:8px;
+                ">
+                    <span style="color:#94a3b8;
+                                 font-size:13px;">
+                        🏷️ Tracked Products
+                    </span>
+                    <span style="color:#f59e0b;
+                                 font-weight:700;">
+                        {{ total_tracked }}
+                    </span>
+                </div>
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    padding:10px 14px;
+                    background:rgba(139,92,246,0.06);
+                    border-radius:8px;
+                ">
+                    <span style="color:#94a3b8;
+                                 font-size:13px;">
+                        📊 SEO Analyses
+                    </span>
+                    <span style="color:#8b5cf6;
+                                 font-weight:700;">
+                        {{ total_seo }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings shortcut -->
+        <a href="/settings" style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:14px;
+            background:#1e293b;
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:12px;
+            text-decoration:none;
+            color:#94a3b8;
+            font-size:13px;
+            transition:all 0.2s;
+        "
+        onmouseover="
+            this.style.borderColor='rgba(0,212,255,0.3)';
+            this.style.color='#00d4ff';
+        "
+        onmouseout="
+            this.style.borderColor='rgba(255,255,255,0.06)';
+            this.style.color='#94a3b8';
+        ">
+            ⚙️ Go to Settings
+        </a>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- Edit Profile -->
+        <div class="profile-card">
+            <h3>✏️ Edit Profile</h3>
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:16px;
+            ">
+                <div class="form-group">
+                    <label class="form-label">
+                        Full Name
+                    </label>
+                    <input type="text" 
+                           class="form-input"
+                           id="inputName"
+                           value="{{ user.name }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Email Address
+                    </label>
+                    <input type="email"
+                           class="form-input"
+                           id="inputEmail"
+                           value="{{ user.email }}">
+                </div>
+            </div>
+            <button 
+  id="save-btn"
+  onclick="saveProfile()"
+  style="
+    background: linear-gradient(135deg, #06B6D4, #0EA5E9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  "
+>
+  💾 Save Changes
+</button>
+        </div>
+
+        <!-- Change Password -->
+        <div class="profile-card">
+            <h3>🔒 Change Password</h3>
+            <div class="form-group">
+                <label class="form-label">
+                    Current Password
+                </label>
+                <input type="password"
+                       class="form-input"
+                       id="currentPw"
+                       placeholder="Enter current password">
+            </div>
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:16px;
+            ">
+                <div class="form-group">
+                    <label class="form-label">
+                        New Password
+                    </label>
+                    <input type="password"
+                           class="form-input"
+                           id="newPw"
+                           placeholder="Min. 6 characters">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Confirm Password
+                    </label>
+                    <input type="password"
+                           class="form-input"
+                           id="confirmPw"
+                           placeholder="Repeat new password">
+                </div>
+            </div>
+            <!-- Password strength -->
+            <div style="margin-bottom:16px;">
+                <div style="
+                    height:4px;
+                    background:rgba(255,255,255,0.1);
+                    border-radius:2px;overflow:hidden;
+                ">
+                    <div id="pwStrengthBar" style="
+                        height:100%;width:0%;
+                        border-radius:2px;
+                        transition:all 0.3s;
+                        background:#ef4444;
+                    "></div>
+                </div>
+                <div id="pwStrengthText" style="
+                    color:#64748b;font-size:11px;
+                    margin-top:4px;
+                "></div>
+            </div>
+            <button class="btn-save"
+                    onclick="changePassword()">
+                🔑 Update Password
+            </button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="profile-card" style="
+            border-color:rgba(239,68,68,0.2);
+        ">
+            <h3 style="color:#ef4444;">
+                ⚠️ Danger Zone
+            </h3>
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                padding:16px;
+                background:rgba(239,68,68,0.05);
+                border:1px solid rgba(239,68,68,0.15);
+                border-radius:10px;
+            ">
+                <div>
+                    <div style="color:white;
+                                font-size:14px;
+                                font-weight:600;">
+                        Delete Account
+                    </div>
+                    <div style="color:#64748b;
+                                font-size:12px;
+                                margin-top:2px;">
+                        Permanently delete your account 
+                        and all data. Cannot be undone.
+                    </div>
+                </div>
+                <button class="btn-danger"
+                        onclick="showDeleteModal()"
+                        style="flex-shrink:0;
+                               margin-left:16px;">
+                    🗑️ Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: #1e293b;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+    ">
+        <h3 style="
+            color: #ef4444;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 16px;
+        ">Delete Account</h3>
+        
+        <p style="color: #94a3b8; font-size: 14px; margin: 0 0 24px;">
+            This will permanently delete your account, all scrape jobs, tracked products, and SEO analyses. This cannot be undone.
+        </p>
+        
+        <div class="form-group" style="text-align:left;">
+            <label class="form-label">
+                Enter your password to confirm:
+            </label>
+            <input type="password"
+                   class="form-input"
+                   id="deleteConfirmPw"
+                   placeholder="Enter password">
+        </div>
+        
+        <div style="
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        ">
+            <button 
+                onclick="closeDeleteModal()"
+                style="
+                    flex: 1;
+                    height: 42px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 14px;
+                "
+            >Cancel</button>
+            <button 
+                onclick="deleteAccount()"
+                style="
+                    flex: 1;
+                    height: 42px;
+                    background: #ef4444;
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                "
+            >Delete Account</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Save profile
+async function saveProfile() {
+  const btn = document.getElementById('save-btn');
+  const name = document.getElementById('inputName').value;
+  const email = document.getElementById('inputEmail').value;
+  
+  // Loading state
+  btn.innerHTML = '⟳ Saving...';
+  btn.disabled = true;
+  btn.style.opacity = '0.8';
+  btn.style.transform = 'scale(0.98)';
+  
+  try {
+    const res = await fetch('/settings/update', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name, email})
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      // Success state
+      btn.innerHTML = '✅ Saved!';
+      btn.style.background = 
+        'linear-gradient(135deg, #22C55E, #16A34A)';
+      btn.style.transform = 'scale(1.02)';
+      btn.style.opacity = '1';
+      
+      // Update all name elements instantly
+      const firstLetter = name.charAt(0).toUpperCase();
+      
+      // Update sidebar avatar letter
+      const sidebarLetter = document.getElementById('sidebar-avatar-letter');
+      if (sidebarLetter) {
+        sidebarLetter.textContent = firstLetter;
+      }
+      
+      // Update sidebar username text
+      const sidebarName = document.getElementById('sidebar-username-text');
+      if (sidebarName) {
+        sidebarName.textContent = name;
+      }
+      
+      // Update top navbar avatar letter
+      const navAvatar = document.getElementById('navbar-avatar');
+      if (navAvatar) {
+        navAvatar.textContent = name.charAt(0).toUpperCase();
+      }
+      
+      // Reset button after 2 seconds
+      setTimeout(() => {
+        btn.innerHTML = '💾 Save Changes';
+        btn.style.background = 
+          'linear-gradient(135deg, #06B6D4, #0EA5E9)';
+        btn.style.transform = 'scale(1)';
+        btn.disabled = false;
+      }, 2000);
+      
+    } else {
+      // Error state
+      btn.innerHTML = '❌ Failed!';
+      btn.style.background = 
+        'linear-gradient(135deg, #EF4444, #DC2626)';
+      btn.style.opacity = '1';
+      
+      setTimeout(() => {
+        btn.innerHTML = '💾 Save Changes';
+        btn.style.background = 
+          'linear-gradient(135deg, #06B6D4, #0EA5E9)';
+        btn.disabled = false;
+      }, 2000);
+    }
+    
+  } catch(e) {
+    btn.innerHTML = '❌ Error!';
+    btn.style.background = 
+      'linear-gradient(135deg, #EF4444, #DC2626)';
+    setTimeout(() => {
+      btn.innerHTML = '💾 Save Changes';
+      btn.style.background = 
+        'linear-gradient(135deg, #06B6D4, #0EA5E9)';
+      btn.disabled = false;
+    }, 2000);
+  }
+}
+
+// Change password
+async function changePassword() {
+    const current = document.getElementById('currentPw').value;
+    const newPw = document.getElementById('newPw').value;
+    const confirm = document.getElementById('confirmPw').value;
+    
+    try {
+        const res = await fetch('/profile/change-password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                current_password: current,
+                new_password: newPw,
+                confirm_password: confirm
+            })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            showToast(data.message);
+            document.getElementById('currentPw').value = '';
+            document.getElementById('newPw').value = '';
+            document.getElementById('confirmPw').value = '';
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) {
+        showToast('Failed to update password', 'error');
+    }
+}
+
+// Password strength meter
+document.getElementById('newPw')
+    .addEventListener('input', function() {
+    const pw = this.value;
+    const bar = document.getElementById('pwStrengthBar');
+    const txt = document.getElementById('pwStrengthText');
+    
+    let strength = 0;
+    if (pw.length >= 6) strength++;
+    if (pw.length >= 10) strength++;
+    if (/[A-Z]/.test(pw)) strength++;
+    if (/[0-9]/.test(pw)) strength++;
+    if (/[^A-Za-z0-9]/.test(pw)) strength++;
+    
+    const levels = [
+        {w:'0%', c:'#ef4444', t:''},
+        {w:'25%', c:'#ef4444', t:'Weak'},
+        {w:'50%', c:'#f59e0b', t:'Fair'},
+        {w:'75%', c:'#00d4ff', t:'Good'},
+        {w:'100%', c:'#22c55e', t:'Strong'},
+    ];
+    
+    const l = levels[Math.min(strength, 4)];
+    bar.style.width = l.w;
+    bar.style.background = l.c;
+    txt.textContent = l.t;
+    txt.style.color = l.c;
+});
+
+// Delete account modal
+function showDeleteModal() {
+    const m = document.getElementById('deleteModal');
+    m.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    document.getElementById('deleteConfirmPw').value = '';
+}
+
+async function deleteAccount() {
+    const pw = document.getElementById('deleteConfirmPw').value;
+    
+    if (!pw) {
+        showToast('Enter your password', 'error');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/profile/delete-account', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({password: pw})
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            window.location.href = '/login';
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) {
+        showToast('Failed to delete account', 'error');
+    }
+}
+
+// Close delete modal on backdrop click
+document.getElementById('deleteModal')
+    .addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+// Toast notification
+function showToast(msg, type='success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `toast ${type}`;
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// Animate stats numbers
+function animateCount(el, target, duration=1000) {
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+            el.textContent = target;
+            clearInterval(timer);
+        } else {
+            el.textContent = Math.floor(start);
+        }
+    }, 16);
+}
+
+// Apply to banner stats on load
+document.addEventListener('DOMContentLoaded', function() {
+    const scrapesEl = document.getElementById('statScrapes');
+    const trackedEl = document.getElementById('statTracked');
+    const seoEl = document.getElementById('statSeo');
+    
+    // Use direct Jinja2 values instead of data attributes
+    const totalScrapes = {{ total_scrapes | default(0) | tojson }};
+    const totalTracked = {{ total_tracked | default(0) | tojson }};
+    const totalSeo = {{ total_seo | default(0) | tojson }};
+    
+    console.log('[PROFILE] Stats:', 
+        totalScrapes, totalTracked, totalSeo);
+    
+    if (scrapesEl) animateCount(scrapesEl, totalScrapes);
+    if (trackedEl) animateCount(trackedEl, totalTracked);
+    if (seoEl) animateCount(seoEl, totalSeo);
+});
+</script>
+
+{% endblock %}

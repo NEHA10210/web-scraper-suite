@@ -1,0 +1,657 @@
+{% extends "base.html" %}
+
+{% block title %}SEO Analyzer - Smart Web Scraper Suite{% endblock %}
+
+{% block page_title %}SEO Analyzer{% endblock %}
+
+{% block content %}
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column - Input Form -->
+    <div class="lg:col-span-1">
+        <div class="card">
+            <div class="p-4 border-b border-primary-200">
+                <h2 class="text-lg font-semibold text-primary-900 flex items-center">
+                    <i class="fas fa-globe text-info-500 mr-2"></i>
+                    Analyze Website
+                </h2>
+            </div>
+            <div class="p-4">
+                <form id="seoAnalyzerForm" class="space-y-4">
+                    <div>
+                        <label for="websiteUrl" class="block text-sm font-medium text-primary-700 mb-1">Website URL</label>
+                        <input type="url" id="websiteUrl" name="url" 
+                               placeholder="https://example.com" 
+                               class="input w-full" required>
+                        <p class="text-xs text-primary-500 mt-1">
+                            Enter the complete URL of the page you want to analyze
+                        </p>
+                    </div>
+                    <button type="submit" class="btn-primary w-full" id="analyzeBtn">
+                        <i class="fas fa-search mr-2"></i>
+                        Analyze SEO
+                    </button>
+                </form>
+                
+                <!-- Loading State -->
+                <div id="loadingSpinner" class="hidden text-center mt-4">
+                    <div class="inline-flex items-center">
+                        <i class="fas fa-spinner fa-spin text-info-500 text-xl mr-2"></i>
+                        <span class="text-primary-600">Analyzing website...</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Tips -->
+                <div class="mt-6 p-4 bg-primary-50 rounded-lg">
+                    <h3 class="text-sm font-semibold text-primary-900 mb-2">
+                        <i class="fas fa-lightbulb text-warning-500 mr-1"></i>
+                        SEO Tips
+                    </h3>
+                    <ul class="text-xs text-primary-600 space-y-1">
+                        <li>• Ensure your page has a unique title tag</li>
+                        <li>• Include meta description for search results</li>
+                        <li>• Use proper heading structure (H1 → H6)</li>
+                        <li>• Optimize images with alt text</li>
+                        <li>• Build quality internal and external links</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column - Results -->
+    <div class="lg:col-span-2">
+        <!-- Results Section -->
+        <div id="seoResults" class="hidden">
+            <!-- SEO Score Overview -->
+            <div class="card mb-6">
+                <div class="p-4 border-b border-primary-200">
+                    <h3 class="text-lg font-semibold text-primary-900">SEO Score Overview</h3>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-primary-50 rounded-lg">
+                            <div id="overallScore" class="text-3xl font-bold text-primary-900 mb-1">-</div>
+                            <div class="text-sm text-primary-600">Overall Score</div>
+                            <div class="w-full bg-primary-200 rounded-full h-2 mt-2">
+                                <div id="overallScoreBar" class="bg-primary-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="text-center p-4 bg-success-50 rounded-lg">
+                            <div id="technicalScore" class="text-3xl font-bold text-success-600 mb-1">-</div>
+                            <div class="text-sm text-success-600">Technical</div>
+                            <div class="w-full bg-success-200 rounded-full h-2 mt-2">
+                                <div id="technicalScoreBar" class="bg-success-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="text-center p-4 bg-warning-50 rounded-lg">
+                            <div id="contentScore" class="text-3xl font-bold text-warning-600 mb-1">-</div>
+                            <div class="text-sm text-warning-600">Content</div>
+                            <div class="w-full bg-warning-200 rounded-full h-2 mt-2">
+                                <div id="contentScoreBar" class="bg-warning-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="text-center p-4 bg-accent-50 rounded-lg">
+                            <div id="performanceScore" class="text-3xl font-bold text-accent-600 mb-1">-</div>
+                            <div class="text-sm text-accent-600">Performance</div>
+                            <div class="w-full bg-accent-200 rounded-full h-2 mt-2">
+                                <div id="performanceScoreBar" class="bg-accent-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Basic Info -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-info-circle text-primary-500 mr-1"></i>
+                            Basic Information
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="basicInfo" class="space-y-2 text-sm">
+                            <!-- Basic info will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Meta Tags -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-tags text-primary-500 mr-1"></i>
+                            Meta Tags
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="metaTags" class="space-y-2 text-sm">
+                            <!-- Meta tags will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Headings -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-heading text-primary-500 mr-1"></i>
+                            Heading Structure
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="headings" class="space-y-2 text-sm">
+                            <!-- Headings will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Links -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-link text-primary-500 mr-1"></i>
+                            Links Analysis
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="links" class="space-y-2 text-sm">
+                            <!-- Links will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Images -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-image text-primary-500 mr-1"></i>
+                            Images
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="images" class="space-y-2 text-sm">
+                            <!-- Images will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technical SEO -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-cog text-primary-500 mr-1"></i>
+                            Technical SEO
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="technical" class="space-y-2 text-sm">
+                            <!-- Technical info will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Keyword Analysis -->
+                <div class="card">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-key text-primary-500 mr-1"></i>
+                            Top Keywords
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="keywords" class="space-y-2 text-sm">
+                            <!-- Keywords will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SEO Recommendations -->
+                <div class="card md:col-span-2">
+                    <div class="p-4 border-b border-primary-200">
+                        <h4 class="text-md font-semibold text-primary-900">
+                            <i class="fas fa-lightbulb text-warning-500 mr-1"></i>
+                            SEO Recommendations
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        <div id="recommendations" class="space-y-3 text-sm">
+                            <!-- Recommendations will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Initial State -->
+        <div id="initialState" class="card">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search text-primary-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-primary-900 mb-2">Ready to Analyze</h3>
+                <p class="text-sm text-primary-600 mb-4">Enter a website URL to get comprehensive SEO analysis</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-primary-500">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-check-circle text-success-500 mr-1"></i>
+                        Meta Tags
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-check-circle text-success-500 mr-1"></i>
+                        Headings
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-check-circle text-success-500 mr-1"></i>
+                        Links
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-check-circle text-success-500 mr-1"></i>
+                        Performance
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('seoAnalyzerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const url = document.getElementById('websiteUrl').value;
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const initialState = document.getElementById('initialState');
+    const seoResults = document.getElementById('seoResults');
+    
+    if (!url) {
+        showSEOError('Please enter a website URL');
+        return;
+    }
+    
+    // Validate URL
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        showSEOError('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+    
+    // Show loading state
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+    loadingSpinner.classList.remove('hidden');
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        
+        const response = await fetch('/api/seo-analyzer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url }),
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success || result.error) {
+            showSEOError(result.error || 'An error occurred');
+        } else {
+            displaySeoResults(result.data);
+            initialState.classList.add('hidden');
+            seoResults.classList.remove('hidden');
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            showSEOError('Analysis timed out. Try again.');
+        } else {
+            showSEOError(error.message || 'Network error. Please try again.');
+        }
+    } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Analyze SEO';
+        loadingSpinner.classList.add('hidden');
+    }
+});
+
+function showSEOError(message) {
+    // Show error in results area instead of toast
+    const resultsArea = document.getElementById('seoResults');
+    const initialState = document.getElementById('initialState');
+    
+    if (resultsArea) {
+        resultsArea.innerHTML = `
+            <div style="text-align:center;padding:40px">
+                <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+                <p style="color:#EF4444;font-weight:600;margin:12px 0 4px">
+                    Analysis Failed
+                </p>
+                <p style="color:#64748B;font-size:0.85rem">
+                    ${message}
+                </p>
+                <button onclick="resetAnalyzer()" style="
+                    margin-top:20px;
+                    padding:8px 16px;
+                    background:#3B82F6;
+                    color:white;
+                    border:none;
+                    border-radius:6px;
+                    cursor:pointer;
+                    font-size:0.85rem
+                ">
+                    Try Again
+                </button>
+            </div>
+        `;
+        resultsArea.classList.remove('hidden');
+        initialState.classList.add('hidden');
+    }
+}
+
+function resetAnalyzer() {
+    const initialState = document.getElementById('initialState');
+    const seoResults = document.getElementById('seoResults');
+    const websiteUrl = document.getElementById('websiteUrl');
+    
+    if (initialState) initialState.classList.remove('hidden');
+    if (seoResults) seoResults.classList.add('hidden');
+    if (websiteUrl) websiteUrl.value = '';
+}
+
+function displaySeoResults(data) {
+    // Display scores with color coding and progress bars
+    const seoScore = data.seo_score || {};
+    const overallScore = seoScore.overall_score || 0;
+    const technicalScore = seoScore.technical_score || 0;
+    const contentScore = seoScore.content_score || 0;
+    const performanceScore = seoScore.performance_score || 0;
+    
+    // Update score text
+    document.getElementById('overallScore').textContent = overallScore;
+    document.getElementById('technicalScore').textContent = technicalScore;
+    document.getElementById('contentScore').textContent = contentScore;
+    document.getElementById('performanceScore').textContent = performanceScore;
+    
+    // Update progress bars with animation
+    setTimeout(() => {
+        document.getElementById('overallScoreBar').style.width = overallScore + '%';
+        document.getElementById('technicalScoreBar').style.width = technicalScore + '%';
+        document.getElementById('contentScoreBar').style.width = contentScore + '%';
+        document.getElementById('performanceScoreBar').style.width = performanceScore + '%';
+    }, 100);
+    
+    // Color code scores
+    document.getElementById('overallScore').className = getScoreClass(overallScore);
+    document.getElementById('technicalScore').className = getScoreClass(technicalScore);
+    document.getElementById('contentScore').className = getScoreClass(contentScore);
+    document.getElementById('performanceScore').className = getScoreClass(performanceScore);
+    
+    // Display basic info
+    const basicInfo = document.getElementById('basicInfo');
+    const title = data.basic_info?.title || 'Not found';
+    const description = data.basic_info?.description || 'Not found';
+    const wordCount = data.content?.word_count || 0;
+    
+    basicInfo.innerHTML = 
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Title:</span>' +
+            '<span class="font-medium">' + (title ? '✓ ' + title : '❌ Missing') + '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Description:</span>' +
+            '<span class="font-medium truncate max-w-xs">' + (description ? '✓ Found' : '❌ Missing') + '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Word Count:</span>' +
+            '<span class="font-medium">' + wordCount + '</span>' +
+        '</div>';
+    
+    // Display meta tags with proper status
+    const metaTags = document.getElementById('metaTags');
+    const metaTitle = data.meta_tags?.title || data.basic_info?.title;
+    const metaDesc = data.meta_tags?.description || data.basic_info?.description;
+    const metaKeywords = data.meta_tags?.keywords;
+    
+    metaTags.innerHTML = 
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Title Tag:</span>' +
+            '<span class="font-medium ' + (metaTitle ? 'text-success-600' : 'text-danger-600') + '">' +
+                (metaTitle ? '✓ Found' : '❌ Missing') +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Meta Description:</span>' +
+            '<span class="font-medium ' + (metaDesc ? 'text-success-600' : 'text-danger-600') + '">' +
+                (metaDesc ? '✓ Found' : '❌ Missing') +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Meta Keywords:</span>' +
+            '<span class="font-medium text-warning-600">' +
+                (metaKeywords ? '✓ Found (Optional)' : '⚠ Missing (Optional)') +
+            '</span>' +
+        '</div>';
+    
+    // Display headings with counts
+    const headings = document.getElementById('headings');
+    let headingsHtml = '';
+    if (data.headings) {
+        Object.keys(data.headings).forEach(function(level) {
+            const count = data.headings[level] ? data.headings[level].length : 0;
+            if (count > 0) {
+                const statusIcon = level === 'h1' ? (count === 1 ? '✓' : '⚠') : '✓';
+                const statusClass = level === 'h1' ? (count === 1 ? 'text-success-600' : 'text-warning-600') : 'text-success-600';
+                headingsHtml += 
+                    '<div class="mb-2">' +
+                        '<span class="text-primary-500 font-medium">' + level.toUpperCase() + ':</span>' +
+                        '<span class="ml-2 ' + statusClass + '">' + statusIcon + ' ' + count + ' found</span>' +
+                    '</div>';
+            }
+        });
+    }
+    headings.innerHTML = headingsHtml || '<span class="text-primary-500">❌ No headings found</span>';
+    
+    // Display links with proper total and broken links
+    const links = document.getElementById('links');
+    const internalCount = data.links?.internal_count || 0;
+    const externalCount = data.links?.external_count || 0;
+    const totalCount = data.links?.total_count || (internalCount + externalCount);
+    const brokenCount = data.links?.broken_count || 0;
+    
+    links.innerHTML = 
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Internal Links:</span>' +
+            '<span class="font-medium ' + (internalCount > 0 ? 'text-success-600' : 'text-warning-600') + '">' +
+                (internalCount > 0 ? '✓ ' : '⚠ ') + internalCount +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">External Links:</span>' +
+            '<span class="font-medium ' + (externalCount > 0 ? 'text-success-600' : 'text-warning-600') + '">' +
+                (externalCount > 0 ? '✓ ' : '⚠ ') + externalCount +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Total Links:</span>' +
+            '<span class="font-medium ' + (totalCount > 0 ? 'text-success-600' : 'text-danger-600') + '">' +
+                (totalCount > 0 ? '✓ ' : '❌ ') + totalCount +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Broken Links:</span>' +
+            '<span class="font-medium ' + (brokenCount === 0 ? 'text-success-600' : 'text-danger-600') + '">' +
+                (brokenCount === 0 ? '✓ ' : '❌ ') + brokenCount +
+            '</span>' +
+        '</div>';
+    
+    // Display images with alt text analysis
+    const images = document.getElementById('images');
+    const totalImages = data.images?.total_count || 0;
+    const withAlt = data.images?.with_alt_count || 0;
+    const withoutAlt = data.images?.without_alt_count || 0;
+    const altCoverage = data.images?.alt_coverage || 0;
+    
+    images.innerHTML = 
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Total Images:</span>' +
+            '<span class="font-medium">' + totalImages + '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">With Alt Text:</span>' +
+            '<span class="font-medium ' + (altCoverage >= 80 ? 'text-success-600' : altCoverage >= 50 ? 'text-warning-600' : 'text-danger-600') + '">' +
+                getAltTextIcon(altCoverage) + ' ' + withAlt + '/' + totalImages + ' (' + Math.round(altCoverage) + '%)' +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Without Alt Text:</span>' +
+            '<span class="font-medium ' + (withoutAlt === 0 ? 'text-success-600' : 'text-danger-600') + '">' +
+                (withoutAlt === 0 ? '✓ ' : '❌ ') + withoutAlt +
+            '</span>' +
+        '</div>';
+    
+    // Display technical info with performance grade
+    const technical = document.getElementById('technical');
+    const statusCode = data.technical?.status_code || 'N/A';
+    const pageSize = data.performance?.size_kb ? Math.round(data.performance.size_kb) + ' KB' : 'N/A';
+    const loadTime = data.performance?.load_time ? data.performance.load_time + 's' : 'N/A';
+    const loadGrade = data.performance?.load_grade || 'N/A';
+    
+    technical.innerHTML = 
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Status Code:</span>' +
+            '<span class="font-medium ' + (statusCode === 200 ? 'text-success-600' : 'text-danger-600') + '">' +
+                (statusCode === 200 ? '✓ ' : '❌ ') + statusCode +
+            '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Page Size:</span>' +
+            '<span class="font-medium">' + pageSize + '</span>' +
+        '</div>' +
+        '<div class="flex justify-between">' +
+            '<span class="text-primary-500">Load Time:</span>' +
+            '<span class="font-medium ' + getLoadTimeClass(loadTime) + '">' +
+                getLoadTimeIcon(loadTime) + ' ' + loadTime + ' (Grade ' + loadGrade + ')' +
+            '</span>' +
+        '</div>';
+    
+    // Display keywords
+    const keywords = document.getElementById('keywords');
+    const topKeywords = data.content?.top_keywords || [];
+    
+    if (topKeywords.length > 0) {
+        let keywordsHtml = '';
+        topKeywords.forEach(function(keyword) {
+            const density = keyword.density || 0;
+            const densityClass = density >= 3 ? 'text-success-600' : density >= 1 ? 'text-warning-600' : 'text-primary-600';
+            keywordsHtml += 
+                '<div class="flex justify-between items-center">' +
+                    '<span class="font-medium text-primary-700">' + keyword.keyword + '</span>' +
+                    '<span class="' + densityClass + '">' + density + '% (' + keyword.frequency + 'x)</span>' +
+                '</div>';
+        });
+        keywords.innerHTML = keywordsHtml;
+    } else {
+        keywords.innerHTML = '<span class="text-primary-500">No keywords found</span>';
+    }
+    
+    // Display recommendations
+    const recommendations = document.getElementById('recommendations');
+    const seoRecommendations = data.recommendations || [];
+    
+    if (seoRecommendations.length > 0) {
+        let recommendationsHtml = '';
+        seoRecommendations.forEach(function(rec) {
+            let iconClass = '';
+            let bgClass = '';
+            let borderClass = '';
+            
+            if (rec.type === 'critical') {
+                iconClass = 'fas fa-exclamation-circle text-danger-500';
+                bgClass = 'bg-danger-50';
+                borderClass = 'border-danger-200';
+            } else if (rec.type === 'warning') {
+                iconClass = 'fas fa-exclamation-triangle text-warning-500';
+                bgClass = 'bg-warning-50';
+                borderClass = 'border-warning-200';
+            } else {
+                iconClass = 'fas fa-info-circle text-info-500';
+                bgClass = 'bg-info-50';
+                borderClass = 'border-info-200';
+            }
+            
+            recommendationsHtml += 
+                '<div class="p-3 ' + bgClass + ' border-l-4 ' + borderClass + ' rounded">' +
+                    '<div class="flex items-start">' +
+                        '<i class="' + iconClass + ' mt-0.5 mr-2"></i>' +
+                        '<div>' +
+                            '<p class="text-primary-700 font-medium">' + rec.message + '</p>' +
+                            '<p class="text-xs text-primary-500 mt-1">Category: ' + rec.category + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        });
+        recommendations.innerHTML = recommendationsHtml;
+    } else {
+        recommendations.innerHTML = 
+            '<div class="p-3 bg-success-50 border-l-4 border-success-200 rounded">' +
+                '<div class="flex items-center">' +
+                    '<i class="fas fa-check-circle text-success-500 mr-2"></i>' +
+                    '<p class="text-success-700 font-medium">Great job! Your page is well optimized for SEO.</p>' +
+                '</div>' +
+            '</div>';
+    }
+}
+
+function getScoreClass(score) {
+    if (score >= 80) return 'text-3xl font-bold text-success-600 mb-1';
+    if (score >= 60) return 'text-3xl font-bold text-warning-600 mb-1';
+    return 'text-3xl font-bold text-danger-600 mb-1';
+}
+
+function getAltTextIcon(coverage) {
+    if (coverage >= 80) return '✓';
+    if (coverage >= 50) return '⚠';
+    return '❌';
+}
+
+function getLoadTimeClass(loadTime) {
+    const time = parseFloat(loadTime);
+    if (time < 1) return 'text-success-600';
+    if (time < 3) return 'text-warning-600';
+    return 'text-danger-600';
+}
+
+function getLoadTimeIcon(loadTime) {
+    const time = parseFloat(loadTime);
+    if (time < 1) return '✓';
+    if (time < 3) return '⚠';
+    return '❌';
+}
+
+function showError(message) {
+    // Create error toast
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'fixed top-4 right-4 bg-danger-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    errorDiv.innerHTML = 
+        '<div class="flex items-center">' +
+            '<i class="fas fa-exclamation-circle mr-2"></i>' +
+            '<span>' + message + '</span>' +
+        '</div>';
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(function() {
+        errorDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

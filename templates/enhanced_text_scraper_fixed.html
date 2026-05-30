@@ -1,0 +1,972 @@
+{% extends "base.html" %}
+
+{% block title %}Enhanced Text Scraper - Fixed Version{% endblock %}
+
+{% block extra_css %}
+<style>
+.fixed-scraper-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.input-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.progress-section {
+    background: #f9fafb;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 1rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.results-section {
+    display: none;
+}
+
+.content-tabs {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    color: #374151;
+    background: #f9fafb;
+}
+
+.tab-button.active {
+    color: #10b981;
+    border-bottom-color: #10b981;
+}
+
+.content-panel {
+    display: none;
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-panel.active {
+    display: block;
+}
+
+.paragraph-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    line-height: 1.6;
+}
+
+.heading-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f3f4f6;
+    border-left: 4px solid #10b981;
+    border-radius: 0.5rem;
+}
+
+.keyword-tag {
+    display: inline-block;
+    background: #10b981;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+}
+
+.entity-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+}
+
+.entity-person { background: #dbeafe; color: #1e40af; }
+.entity-org { background: #fce7f3; color: #a21caf; }
+.entity-gpe { background: #d1fae5; color: #065f46; }
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.export-button {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 3rem;
+    height: 1.5rem;
+    margin: 0 0.5rem;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 1.5rem;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.125rem;
+    width: 1.125rem;
+    left: 0.1875rem;
+    bottom: 0.1875rem;
+    background: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background: #10b981;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(1.5rem);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fixed-scraper-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="text-3xl font-bold mb-4">Enhanced Text Scraper - Fixed</h1>
+        <p class="text-lg opacity-90">Clean, structured text extraction with NLP analysis</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="wordCount">0</div>
+                <div class="stat-label">Words</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="keywordCount">0</div>
+                <div class="stat-label">Keywords</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="entityCount">0</div>
+                <div class="stat-label">Entities</div>
+            </div>
+            <div class="stat-card bg-white bg-opacity-20 text-white">
+                <div class="stat-value" id="readabilityScore">0</div>
+                <div class="stat-label">Readability</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="input-section">
+        <h2 class="text-2xl font-bold mb-6">Extract Text Content</h2>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">URL to Analyze</label>
+            <div class="flex gap-2">
+                <input type="url" id="urlInput" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="https://example.com/article">
+                <button onclick="startScraping()" id="scrapeButton" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-search mr-2"></i>Extract & Analyze
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Processing</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="enableJS" checked class="mr-2">
+                        <span>Enable JavaScript</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="enableScroll" checked class="mr-2">
+                        <span>Scroll for Content</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Analysis</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="extractKeywords" checked class="mr-2">
+                        <span>Extract Keywords</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="extractEntities" checked class="mr-2">
+                        <span>Extract Entities</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="cleanContent" checked class="mr-2">
+                        <span>Clean Content</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="analyzeSEO" checked class="mr-2">
+                        <span>SEO Analysis</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="progress-section">
+        <h3 class="text-lg font-semibold mb-4">Processing...</h3>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p id="progressText" class="text-center text-gray-600">Initializing...</p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="results-section">
+        <!-- Export Options -->
+        <div class="export-buttons">
+            <button onclick="exportData('json')" class="export-button">
+                <i class="fas fa-code"></i> JSON
+            </button>
+            <button onclick="exportData('markdown')" class="export-button">
+                <i class="fas fa-markdown"></i> Markdown
+            </button>
+            <button onclick="copyContent()" class="export-button">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+            <label class="export-button">
+                <i class="fas fa-eye"></i>
+                <span id="toggleText">Show Raw</span>
+                <input type="checkbox" id="toggleRaw" onchange="toggleView()" class="hidden">
+                <span class="toggle-switch">
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+        </div>
+
+        <!-- Content Tabs -->
+        <div class="content-tabs">
+            <button class="tab-button active" onclick="showTab('overview')">Overview</button>
+            <button class="tab-button" onclick="showTab('content')">Content</button>
+            <button class="tab-button" onclick="showTab('keywords')">Keywords</button>
+            <button class="tab-button" onclick="showTab('entities')">Entities</button>
+            <button class="tab-button" onclick="showTab('seo')">SEO</button>
+        </div>
+
+        <!-- Tab Panels -->
+        <div id="overviewPanel" class="content-panel active">
+            <h3 class="text-xl font-semibold mb-4">Content Overview</h3>
+            <div id="overviewContent">
+                <!-- Overview will be inserted here -->
+            </div>
+        </div>
+
+        <div id="contentPanel" class="content-panel">
+            <h3 class="text-xl font-semibold mb-4">Extracted Content</h3>
+            <div id="contentDisplay">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+
+        <div id="keywordsPanel" class="content-panel">
+            <h3 class="text-xl font-semibold mb-4">Keywords</h3>
+            <div id="keywordsDisplay">
+                <!-- Keywords will be inserted here -->
+            </div>
+        </div>
+
+        <div id="entitiesPanel" class="content-panel">
+            <h3 class="text-xl font-semibold mb-4">Named Entities</h3>
+            <div id="entitiesDisplay">
+                <!-- Entities will be inserted here -->
+            </div>
+        </div>
+
+        <div id="seoPanel" class="content-panel">
+            <h3 class="text-xl font-semibold mb-4">SEO Analysis</h3>
+            <div id="seoDisplay">
+                <!-- SEO analysis will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let processedData = null;
+let currentView = 'clean'; // 'clean' or 'raw'
+
+// Main scraping function
+async function startScraping() {
+    const url = document.getElementById('urlInput').value.trim();
+    
+    if (!url) {
+        showMessage('Please enter a URL to analyze', 'error');
+        return;
+    }
+    
+    // Clear everything first
+    clearAll();
+    
+    // Show progress
+    showProgress();
+    
+    // Build configuration
+    const config = {
+        javascript: document.getElementById('enableJS').checked,
+        scroll: document.getElementById('enableScroll').checked,
+        clean_text: document.getElementById('cleanContent').checked,
+        extract_structure: true,
+        extract_entities: document.getElementById('extractEntities').checked,
+        generate_keywords: document.getElementById('extractKeywords').checked,
+        analyze_seo: document.getElementById('analyzeSEO').checked,
+        generate_summary: true,
+        classify_content: true
+    };
+    
+    try {
+        updateProgress(25, 'Fetching webpage...');
+        
+        const response = await fetch('/api/v1/enhanced-text-scraper', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url, config })
+        });
+        
+        updateProgress(50, 'Processing content...');
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateProgress(75, 'Analyzing text...');
+            processedData = result.processed_content;
+            
+            updateProgress(100, 'Complete!');
+            
+            setTimeout(() => {
+                hideProgress();
+                displayResults();
+                showMessage('Content analyzed successfully!', 'success');
+            }, 500);
+            
+        } else {
+            hideProgress();
+            showMessage('Analysis failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+        
+    } catch (error) {
+        hideProgress();
+        showMessage('Network error: ' + error.message, 'error');
+    }
+}
+
+// Clear all data and errors
+function clearAll() {
+    processedData = null;
+    currentView = 'clean';
+    
+    // Hide results
+    document.getElementById('resultsSection').style.display = 'none';
+    
+    // Clear all content areas
+    const contentAreas = [
+        'overviewContent', 'contentDisplay', 'keywordsDisplay', 
+        'entitiesDisplay', 'seoDisplay'
+    ];
+    
+    contentAreas.forEach(id => {
+        document.getElementById(id).innerHTML = '';
+    });
+    
+    // Reset stats
+    document.getElementById('wordCount').textContent = '0';
+    document.getElementById('keywordCount').textContent = '0';
+    document.getElementById('entityCount').textContent = '0';
+    document.getElementById('readabilityScore').textContent = '0';
+    
+    // Reset toggle
+    document.getElementById('toggleRaw').checked = false;
+    document.getElementById('toggleText').textContent = 'Show Raw';
+    
+    // Clear messages
+    clearMessages();
+}
+
+// Clear messages
+function clearMessages() {
+    const messages = document.querySelectorAll('.error-message, .success-message');
+    messages.forEach(msg => msg.remove());
+}
+
+// Show message
+function showMessage(text, type) {
+    clearMessages();
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `${type}-message fixed top-4 right-4 z-50 max-w-md`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'} mr-2"></i>
+        ${text}
+    `;
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
+}
+
+// Progress functions
+function showProgress() {
+    document.getElementById('progressSection').style.display = 'block';
+    document.getElementById('scrapeButton').disabled = true;
+    document.getElementById('scrapeButton').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+}
+
+function hideProgress() {
+    document.getElementById('progressSection').style.display = 'none';
+    document.getElementById('scrapeButton').disabled = false;
+    document.getElementById('scrapeButton').innerHTML = '<i class="fas fa-search mr-2"></i>Extract & Analyze';
+}
+
+function updateProgress(percent, text) {
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressText').textContent = text;
+}
+
+// Display results
+function displayResults() {
+    if (!processedData) return;
+    
+    // Show results section
+    document.getElementById('resultsSection').style.display = 'block';
+    
+    // Update stats
+    updateStats();
+    
+    // Display overview
+    displayOverview();
+    
+    // Display content
+    displayContent();
+    
+    // Display keywords
+    displayKeywords();
+    
+    // Display entities
+    displayEntities();
+    
+    // Display SEO
+    displaySEO();
+    
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Update stats
+function updateStats() {
+    const metadata = processedData.metadata || {};
+    const readability = processedData.readability || {};
+    
+    document.getElementById('wordCount').textContent = metadata.word_count || 0;
+    document.getElementById('keywordCount').textContent = (processedData.keywords || []).length;
+    document.getElementById('entityCount').textContent = (processedData.entities || []).length;
+    document.getElementById('readabilityScore').textContent = Math.round(readability.flesch_score || 0);
+}
+
+// Display overview
+function displayOverview() {
+    const metadata = processedData.metadata || {};
+    const classification = processedData.classification || {};
+    const summary = processedData.summary || {};
+    
+    document.getElementById('overviewContent').innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-semibold text-lg mb-2">${processedData.title || 'Untitled'}</h4>
+                <p class="text-gray-600 text-sm">URL: <a href="${metadata.url || '#'}" target="_blank" class="text-green-600 hover:underline">${metadata.url || 'N/A'}</a></p>
+                <p class="text-gray-600 text-sm">Type: ${classification.type || 'Unknown'} (${Math.round((classification.confidence || 0) * 100)}% confidence)</p>
+                <p class="text-gray-600 text-sm">Language: ${classification.language || 'Unknown'}</p>
+            </div>
+            <div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm text-gray-600">Words</div>
+                        <div class="font-semibold">${metadata.word_count || 0}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Reading Time</div>
+                        <div class="font-semibold">${readability.reading_time_minutes || 0} min</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Paragraphs</div>
+                        <div class="font-semibold">${(processedData.paragraphs || []).length}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Headings</div>
+                        <div class="font-semibold">${(processedData.headings || []).length}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        ${summary.short ? `
+        <div class="mt-6">
+            <h4 class="font-semibold mb-2">Summary</h4>
+            <p class="text-gray-700">${summary.short}</p>
+        </div>
+        ` : ''}
+    `;
+}
+
+// Display content
+function displayContent() {
+    const paragraphs = processedData.paragraphs || [];
+    const headings = processedData.headings || [];
+    
+    let contentHTML = '';
+    
+    // Add headings
+    if (headings.length > 0) {
+        contentHTML += '<h4 class="font-semibold mb-3">Headings</h4>';
+        headings.forEach(heading => {
+            contentHTML += `
+                <div class="heading-item">
+                    <strong>H${heading.level}:</strong> ${heading.text}
+                </div>
+            `;
+        });
+    }
+    
+    // Add paragraphs
+    if (currentView === 'clean') {
+        contentHTML += '<h4 class="font-semibold mb-3 mt-6">Paragraphs</h4>';
+        paragraphs.forEach((para, index) => {
+            contentHTML += `
+                <div class="paragraph-item">
+                    <div class="text-sm text-gray-500 mb-2">Paragraph ${index + 1}</div>
+                    <div>${para}</div>
+                </div>
+            `;
+        });
+    } else {
+        // Raw view
+        contentHTML += '<h4 class="font-semibold mb-3 mt-6">Raw Text</h4>';
+        const rawText = paragraphs.join('\\n\\n');
+        contentHTML += `
+            <div class="paragraph-item">
+                <pre class="whitespace-pre-wrap text-sm">${rawText}</pre>
+            </div>
+        `;
+    }
+    
+    document.getElementById('contentDisplay').innerHTML = contentHTML || '<p class="text-gray-500">No content found</p>';
+}
+
+// Display keywords
+function displayKeywords() {
+    const keywords = processedData.keywords || [];
+    
+    if (keywords.length > 0) {
+        let keywordsHTML = '<div class="flex flex-wrap gap-2 mb-6">';
+        keywords.slice(0, 20).forEach(keyword => {
+            keywordsHTML += `
+                <span class="keyword-tag" title="Density: ${keyword.density}%">
+                    ${keyword.keyword} <small>(${keyword.density}%)</small>
+                </span>
+            `;
+        });
+        keywordsHTML += '</div>';
+        
+        keywordsHTML += '<h4 class="font-semibold mb-3">Top Keywords by Frequency</h4>';
+        keywordsHTML += '<div class="space-y-2">';
+        keywords.slice(0, 10).forEach(keyword => {
+            keywordsHTML += `
+                <div class="flex justify-between items-center">
+                    <span class="font-medium">${keyword.keyword}</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-24 bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: ${Math.min(keyword.density * 5, 100)}%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600">${keyword.frequency}x</span>
+                    </div>
+                </div>
+            `;
+        });
+        keywordsHTML += '</div>';
+        
+        document.getElementById('keywordsDisplay').innerHTML = keywordsHTML;
+    } else {
+        document.getElementById('keywordsDisplay').innerHTML = '<p class="text-gray-500">No keywords found</p>';
+    }
+}
+
+// Display entities
+function displayEntities() {
+    const entities = processedData.entities || [];
+    
+    if (entities.length > 0) {
+        // Group by type
+        const grouped = {};
+        entities.forEach(entity => {
+            if (!grouped[entity.label]) {
+                grouped[entity.label] = [];
+            }
+            grouped[entity.label].push(entity);
+        });
+        
+        let entitiesHTML = '';
+        Object.entries(grouped).forEach(([type, entityList]) => {
+            entitiesHTML += `
+                <div class="mb-6">
+                    <h4 class="font-semibold mb-3">${type} (${entityList.length})</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${entityList.map(entity => `
+                            <span class="entity-badge entity-${type.toLowerCase()}">
+                                ${entity.text} ${entity.count > 1 ? `(${entity.count})` : ''}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('entitiesDisplay').innerHTML = entitiesHTML;
+    } else {
+        document.getElementById('entitiesDisplay').innerHTML = '<p class="text-gray-500">No entities found</p>';
+    }
+}
+
+// Display SEO
+function displaySEO() {
+    const seo = processedData.seo || {};
+    
+    const seoScore = calculateSEOScore(seo);
+    const scoreClass = seoScore >= 80 ? 'text-green-600' : seoScore >= 60 ? 'text-blue-600' : seoScore >= 40 ? 'text-orange-600' : 'text-red-600';
+    
+    let seoHTML = `
+        <div class="text-center mb-6">
+            <div class="text-4xl font-bold ${scoreClass}">${seoScore}</div>
+            <div class="text-sm text-gray-600">SEO Score</div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-semibold mb-3">Title Analysis</h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Present:</span>
+                        <span class="${seo.title?.present ? 'text-green-600' : 'text-red-600'}">
+                            ${seo.title?.present ? '✓' : '✗'}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Length:</span>
+                        <span>${seo.title?.length || 0} chars</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Optimal:</span>
+                        <span class="${seo.title?.optimal ? 'text-green-600' : 'text-orange-600'}">
+                            ${seo.title?.optimal ? '✓' : '✗'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-semibold mb-3">Meta Description</h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Present:</span>
+                        <span class="${seo.meta_description?.present ? 'text-green-600' : 'text-red-600'}">
+                            ${seo.meta_description?.present ? '✓' : '✗'}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Length:</span>
+                        <span>${seo.meta_description?.length || 0} chars</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Optimal:</span>
+                        <span class="${seo.meta_description?.optimal ? 'text-green-600' : 'text-orange-600'}">
+                            ${seo.meta_description?.optimal ? '✓' : '✗'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (seo.recommendations && seo.recommendations.length > 0) {
+        seoHTML += `
+            <div class="mt-6">
+                <h4 class="font-semibold mb-3">Recommendations</h4>
+                <ul class="space-y-2">
+                    ${seo.recommendations.map(rec => `
+                        <li class="flex items-start">
+                            <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-2"></i>
+                            <span>${rec}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    document.getElementById('seoDisplay').innerHTML = seoHTML;
+}
+
+// Calculate SEO score
+function calculateSEOScore(seo) {
+    let score = 0;
+    
+    if (seo.title?.present) score += 20;
+    if (seo.title?.optimal) score += 20;
+    if (seo.meta_description?.present) score += 20;
+    if (seo.meta_description?.optimal) score += 20;
+    if (seo.headings?.has_h1) score += 10;
+    if (seo.content?.word_count >= 300) score += 10;
+    
+    return Math.min(score, 100);
+}
+
+// Tab switching
+function showTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Update panels
+    document.querySelectorAll('.content-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById(tabName + 'Panel').classList.add('active');
+}
+
+// Toggle view
+function toggleView() {
+    currentView = document.getElementById('toggleRaw').checked ? 'raw' : 'clean';
+    document.getElementById('toggleText').textContent = currentView === 'raw' ? 'Show Clean' : 'Show Raw';
+    
+    if (processedData) {
+        displayContent();
+    }
+}
+
+// Export functions
+function exportData(format) {
+    if (!processedData) {
+        showMessage('No data to export', 'error');
+        return;
+    }
+    
+    let content = '';
+    let filename = `scraped_content_${Date.now()}`;
+    let mimeType = 'text/plain';
+    
+    switch (format) {
+        case 'json':
+            content = JSON.stringify(processedData, null, 2);
+            filename += '.json';
+            mimeType = 'application/json';
+            break;
+        case 'markdown':
+            content = exportToMarkdown();
+            filename += '.md';
+            mimeType = 'text/markdown';
+            break;
+    }
+    
+    downloadFile(content, filename, mimeType);
+    showMessage(`Data exported as ${format.toUpperCase()}`, 'success');
+}
+
+function exportToMarkdown() {
+    let md = `# ${processedData.title || 'Untitled'}\\n\\n`;
+    
+    if (processedData.summary?.short) {
+        md += `## Summary\\n${processedData.summary.short}\\n\\n`;
+    }
+    
+    if (processedData.paragraphs && processedData.paragraphs.length > 0) {
+        md += `## Content\\n`;
+        processedData.paragraphs.forEach(p => {
+            md += `${p}\\n\\n`;
+        });
+    }
+    
+    if (processedData.keywords && processedData.keywords.length > 0) {
+        md += `## Keywords\\n`;
+        processedData.keywords.slice(0, 10).forEach(k => {
+            md += `- **${k.keyword}** (density: ${k.density}%)\\n`;
+        });
+    }
+    
+    return md;
+}
+
+function copyContent() {
+    if (!processedData) {
+        showMessage('No data to copy', 'error');
+        return;
+    }
+    
+    let text = '';
+    
+    if (processedData.title) {
+        text += `${processedData.title}\\n\\n`;
+    }
+    
+    if (processedData.paragraphs && processedData.paragraphs.length > 0) {
+        text += processedData.paragraphs.join('\\n\\n');
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showMessage('Content copied to clipboard!', 'success');
+    }).catch(() => {
+        showMessage('Failed to copy to clipboard', 'error');
+    });
+}
+
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

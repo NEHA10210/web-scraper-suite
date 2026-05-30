@@ -1,0 +1,526 @@
+{% extends "admin_base.html" %}
+
+{% block title %}SEO Analyzer - Smart Web Scraper Suite{% endblock %}
+{% block page_title %}SEO Analyzer{% endblock %}
+{% block page_subtitle %}Analyze web pages for SEO optimization and improve rankings.{% endblock %}
+
+{% block content %}
+<style>
+/* Fix URL input styling */
+#url-input {
+    background: #1E2433 !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+}
+
+/* Remove cyan border from form card */
+.card-soft {
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: none !important;
+}
+
+/* Stat card styles */
+.stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+.stat-label {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+/* Fix text contrast */
+.card-title, .section-title {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    opacity: 1 !important;
+}
+
+.form-label, .input-label {
+    color: #E2E8F0 !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    opacity: 1 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+.text-muted, .subtitle-text {
+    color: #94A3B8 !important;
+    opacity: 1 !important;
+}
+
+/* History icon contrast fix */
+.history-icon {
+    color: #64748B !important;
+}
+
+/* History table headers */
+.history-table th {
+    color: #94A3B8 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Score badges */
+.score-badge {
+    height: 28px !important;
+    font-size: 0.8rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 0 8px !important;
+}
+</style>
+
+<!-- Analyze Form -->
+<div class="card-soft mb-4">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-3">Analyze Website</h5>
+        <p class="subtitle-text mb-4">Enter a URL to analyze its SEO performance and get optimization recommendations.</p>
+        
+        <form id="analyzeForm">
+            <div class="row g-3">
+                <div class="col-md-10">
+                    <label class="form-label">Website URL</label>
+                    <input type="url" class="form-control" id="url-input" placeholder="https://example.com" required>
+                    <div class="invalid-feedback" id="urlError" style="display: none;"></div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn-gradient-purple w-100" id="analyze-btn">
+                        <i class="bi bi-search me-2"></i>Analyze
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div id="results-section" style="margin-top: 24px;">
+  
+    <!-- Default state before analysis -->
+    <div id="results-placeholder" style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 48px;
+        text-align: center;
+        color: #94A3B8;
+    ">
+        <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+        <p style="font-size: 1.1rem; color: #E2E8F0; margin: 0 0 8px;">
+            Ready to Analyze
+        </p>
+        <p style="font-size: 0.9rem; margin: 0;">
+            Enter a URL above and click Analyze to see SEO results
+        </p>
+    </div>
+
+    <!-- Results shown after analysis -->
+    <div id="results-content" style="display: none;">
+        
+        <!-- Score Card -->
+        <div style="
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+        ">
+            <div id="score-circle" style="
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: white;
+                border: 4px solid;
+            ">
+                <span id="score-number">0</span>
+            </div>
+            <div id="score-label" style="
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #FFFFFF;
+                margin-bottom: 8px;
+            "></div>
+            <div id="analyzed-url" style="
+                font-size: 0.85rem;
+                color: #94A3B8;
+                margin-bottom: 16px;
+            "></div>
+            <button id="exportBtn" style="
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #E2E8F0;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(255,255,255,0.15)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                <i class="bi bi-clipboard me-2"></i>Copy Report
+            </button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        ">
+            <div class="stat-card">
+                <div class="stat-label">Title Length</div>
+                <div class="stat-value" id="stat-title-length">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Meta Description</div>
+                <div class="stat-value" id="stat-meta-length">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">H1 Tags</div>
+                <div class="stat-value" id="stat-h1">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Word Count</div>
+                <div class="stat-value" id="stat-words">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Images No Alt</div>
+                <div class="stat-value" id="stat-images">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Load Time</div>
+                <div class="stat-value" id="stat-load">—</div>
+            </div>
+        </div>
+
+        <!-- Issues List -->
+        <div style="
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        ">
+            <h3 style="color: #FFFFFF; margin: 0 0 20px; font-size: 1rem;">
+                Issues Found
+            </h3>
+            <div id="issues-list"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- History Section -->
+<div class="card-soft">
+    <div class="card-body p-4">
+        <h5 class="section-title mb-4">Your History</h5>
+        <div id="historyContainer">
+            <!-- History will be populated here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentAnalysis = null; // Store current analysis data
+
+// Load history on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+});
+
+// Analyze button
+document.getElementById('analyze-btn').addEventListener('click', 
+async function() {
+    const url = document.getElementById('url-input').value.trim();
+    
+    if (!url || !url.startsWith('http')) {
+        alert('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+    
+    // Show loading
+    this.disabled = true;
+    this.innerHTML = '⟳ Analyzing...';
+    document.getElementById('results-placeholder').style.display = 'none';
+    document.getElementById('results-content').style.display = 'none';
+    
+    try {
+        const response = await fetch('/seo/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url: url})
+        });
+        
+        const data = await response.json();
+        console.log('SEO Result:', data);
+        
+        if (!data.success) {
+            alert('Error: ' + (data.error || 'Analysis failed'));
+            document.getElementById('results-placeholder').style.display = 'block';
+            return;
+        }
+        
+        // Show results
+        displayResults(data);
+        
+        // Refresh history after analysis
+        loadHistory();
+        
+    } catch(err) {
+        console.error('Fetch error:', err);
+        alert('Network error: ' + err.message);
+        document.getElementById('results-placeholder').style.display = 'block';
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="bi bi-search me-2"></i>Analyze';
+    }
+});
+
+// Form submit handler
+document.getElementById('analyzeForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('analyze-btn').click();
+});
+
+function displayResults(data) {
+    // Store current analysis for export
+    currentAnalysis = data;
+    
+    // Show results section
+    document.getElementById('results-content').style.display = 'block';
+    
+    // Score circle
+    const score = data.overall_score || 0;
+    const circle = document.getElementById('score-circle');
+    const scoreEl = document.getElementById('score-number');
+    scoreEl.textContent = score;
+    
+    if (score >= 80) {
+        circle.style.borderColor = '#10B981';
+        circle.style.background = 'rgba(16,185,129,0.15)';
+        document.getElementById('score-label').textContent = 'Good';
+        document.getElementById('score-label').style.color = '#10B981';
+    } else if (score >= 50) {
+        circle.style.borderColor = '#F59E0B';
+        circle.style.background = 'rgba(245,158,11,0.15)';
+        document.getElementById('score-label').textContent = 'Needs Work';
+        document.getElementById('score-label').style.color = '#F59E0B';
+    } else {
+        circle.style.borderColor = '#F43F5E';
+        circle.style.background = 'rgba(244,63,94,0.15)';
+        document.getElementById('score-label').textContent = 'Poor';
+        document.getElementById('score-label').style.color = '#F43F5E';
+    }
+    
+    document.getElementById('analyzed-url').textContent = data.url;
+    
+    // Stats
+    document.getElementById('stat-title-length').textContent = 
+        (data.title_length || 0) + ' chars';
+    document.getElementById('stat-meta-length').textContent = 
+        (data.meta_desc_length || 0) + ' chars';
+    document.getElementById('stat-h1').textContent = data.h1_count || 0;
+    document.getElementById('stat-words').textContent = 
+        (data.word_count || 0) + ' words';
+    document.getElementById('stat-images').textContent = 
+        (data.images_no_alt || 0) + ' missing';
+    document.getElementById('stat-load').textContent = 
+        (data.load_time_ms || 0) + 'ms';
+    
+    // Color code H1
+    const h1El = document.getElementById('stat-h1');
+    h1El.style.color = (data.h1_count === 1) ? '#10B981' : '#F43F5E';
+    
+    // Issues list
+    const issuesEl = document.getElementById('issues-list');
+    const issues = data.issues_list || [];
+    
+    if (issues.length === 0) {
+        issuesEl.innerHTML = '<div style="color:#10B981;text-align:center;' +
+            'padding:20px;">✓ No issues found! Great SEO!</div>';
+    } else {
+        issuesEl.innerHTML = issues.map(issue => {
+            const colors = {
+                critical: '#F43F5E',
+                warning: '#F59E0B', 
+                info: '#00D4FF'
+            };
+            const color = colors[issue.severity] || '#94A3B8';
+            return `
+                <div style="border-left: 3px solid ${color}; 
+                    padding: 12px 16px; margin-bottom: 12px;
+                    background: rgba(255,255,255,0.02);
+                    border-radius: 0 8px 8px 0;">
+                    <div style="display:flex; gap:8px; 
+                        align-items:center; margin-bottom:6px;">
+                        <span style="background:${color}22; color:${color};
+                            padding:2px 8px; border-radius:20px; 
+                            font-size:0.75rem; font-weight:600;">
+                            ${issue.severity.toUpperCase()}
+                        </span>
+                        <span style="background:rgba(255,255,255,0.08); 
+                            color:#E2E8F0; padding:2px 8px; 
+                            border-radius:20px; font-size:0.75rem;">
+                            ${issue.category}
+                        </span>
+                    </div>
+                    <div style="color:#E2E8F0; font-size:0.9rem; 
+                        margin-bottom:4px;">${issue.issue}</div>
+                    <div style="color:#94A3B8; font-size:0.8rem;">
+                        Fix: ${issue.fix}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Smooth scroll to results with offset
+    window.scrollTo({
+        top: document.getElementById('results-section')
+            .offsetTop - 80,
+        behavior: 'smooth'
+    });
+}
+
+// Load history
+async function loadHistory() {
+    const container = document.getElementById('historyContainer');
+    
+    try {
+        const response = await fetch('/seo/history');
+        const result = await response.json();
+        
+        if (!result.success || !result.history || result.history.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-clock-history history-icon" style="font-size: 3rem;"></i>
+                    <p class="mt-2" style="color: #E2E8F0;">No analyses yet</p>
+                    <p style="font-size: 0.85rem; color: #94A3B8;">Enter a URL above to get started</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="table-responsive"><table class="table table-dark table-hover history-table"><thead><tr>';
+        html += '<th>Website</th>';
+        html += '<th>Score</th>';
+        html += '<th>Analyzed</th>';
+        html += '<th>Actions</th>';
+        html += '</tr></thead><tbody>';
+        
+        result.history.forEach(item => {
+            const scoreColor = item.score >= 80 ? 'success' : (item.score >= 50 ? 'warning' : 'danger');
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`;
+            
+            html += `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="${faviconUrl}" alt="" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22><rect width=%2220%22 height=%2220%22 fill=%22%23444%22/><text x=%2210%22 y=%2214%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%228%22>🌐</text></svg>'">
+                            <div>
+                                <strong style="color: #FFFFFF;">${item.domain}</strong>
+                                <br>
+                                <small class="text-muted">${item.title || 'No title'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-${scoreColor} score-badge">${item.score}/100</span>
+                    </td>
+                    <td style="color: var(--text-secondary);">${item.created_at}</td>
+                    <td>
+                        <button class="btn btn-sm btn-slate view-btn" data-id="${item.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+        
+        // Add click handlers for view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.dataset.id;
+                try {
+                    const response = await fetch(`/seo/history/${id}`);
+                    const data = await response.json();
+                    if (data.success) {
+                        displayResults(data);
+                        window.scrollTo({
+                            top: document.getElementById('results-section')
+                                .offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        showToast('Failed to load analysis', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error loading analysis', 'error');
+                }
+            });
+        });
+        
+    } catch (error) {
+        console.error('Failed to load history:', error);
+        container.innerHTML = '<p class="text-danger">Failed to load history</p>';
+    }
+}
+
+// Export button functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            if (!currentAnalysis) {
+                showToast('No analysis to export', 'error');
+                return;
+            }
+            
+            const report = `SEO Report for ${currentAnalysis.url}
+Score: ${currentAnalysis.overall_score}/100 (${currentAnalysis.overall_score >= 80 ? 'Good' : currentAnalysis.overall_score >= 50 ? 'Needs Work' : 'Poor'})
+Title: ${currentAnalysis.title_length || 0} chars
+Meta: ${currentAnalysis.meta_desc_length || 0} chars  
+H1 Tags: ${currentAnalysis.h1_count || 0}
+Word Count: ${currentAnalysis.word_count || 0} words
+Issues: ${(currentAnalysis.issues_list || []).length} found`;
+            
+            navigator.clipboard.writeText(report).then(() => {
+                showToast('Report copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy report', 'error');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

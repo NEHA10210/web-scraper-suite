@@ -1,0 +1,795 @@
+{% extends "base.html" %}
+
+{% block title %}Price Tracker - Smart Web Scraper Suite{% endblock %}
+
+{% block page_title %}Price Tracker{% endblock %}
+
+{% block content %}
+<!-- Compact Page Header -->
+<div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-primary-900">Price Tracker</h1>
+            <p class="text-sm text-primary-600 mt-1">Monitor product prices and get notified of changes.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="btn-secondary">
+                <i class="fas fa-download mr-2"></i>
+                Export
+            </button>
+            <button class="btn-primary">
+                <i class="fas fa-plus mr-2"></i>
+                Add Product
+            </button>
+            <button id="add-btn" onclick="addProduct()" class="btn-secondary ml-2">
+                +
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <!-- Left Column - Form -->
+    <div class="lg:col-span-1">
+        <div class="card">
+            <div class="p-4 border-b border-primary-200">
+                <h2 class="text-lg font-semibold text-primary-900">Add Product</h2>
+            </div>
+            <div class="p-4">
+                <form id="priceTrackerForm" class="space-y-3">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-primary-700 mb-1">Product URL</label>
+                        <div class="relative">
+                            <input type="url" id="productUrl" name="url" 
+                                   placeholder="https://www.amazon.com/dp/..." 
+                                   class="input pr-10 text-sm">
+                            <i class="fas fa-link absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-400"></i>
+                        </div>
+                        <p class="text-xs text-primary-500 mt-1">
+                            Supported: Amazon, Flipkart, eBay
+                            <br>
+                            <strong>Test URLs:</strong> 
+                            <a href="#" onclick="document.getElementById('productUrl').value='https://www.amazon.com/dp/B08L5YPJ2K'; return false;" class="text-blue-600 hover:underline">iPhone 15</a> | 
+                            <a href="#" onclick="document.getElementById('productUrl').value='https://www.flipkart.com/apple-iphone-15-blue-128-gb/p/itmbf78ef8ed96bcf'; return false;" class="text-blue-600 hover:underline">iPhone 15 (Flipkart)</a>
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label for="targetPrice" class="block text-sm font-medium text-primary-700 mb-1">Target Price (Optional)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-500 text-sm">$</span>
+                            <input type="number" id="targetPrice" name="target_price" 
+                                   placeholder="99.99" 
+                                   class="input pl-8 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="notificationEmail" class="block text-sm font-medium text-primary-700 mb-1">Email Alerts</label>
+                        <input type="email" id="notificationEmail" name="email" 
+                               placeholder="your@email.com" 
+                               class="input text-sm">
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button type="button" id="fetchBtn" class="btn-secondary flex-1 text-sm" onclick="handleFetchProduct()">
+                            <i class="fas fa-search mr-2"></i>
+                            Fetch Details
+                        </button>
+                        <button type="submit" class="btn-primary flex-1 text-sm" id="trackBtn" disabled>
+                            <i class="fas fa-plus mr-2"></i>
+                            Add to Tracker
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Product Preview Card -->
+                <div id="productPreview" class="hidden mt-4">
+                    <div class="border-t border-primary-200 pt-4">
+                        <h3 class="text-sm font-medium text-primary-700 mb-3">Product Preview</h3>
+                        <div class="bg-primary-50 rounded-lg p-3">
+                            <div class="flex gap-3">
+                                <img id="previewImage" src="" alt="Product" class="w-16 h-16 object-cover rounded-lg">
+                                <div class="flex-1 min-w-0">
+                                    <h4 id="previewName" class="text-sm font-medium text-primary-900 truncate"></h4>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span id="previewPrice" class="text-lg font-semibold text-success-600"></span>
+                                        <span id="previewOriginalPrice" class="text-sm text-primary-500 line-through"></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <div id="previewRating" class="flex items-center text-xs text-warning-600">
+                                            <!-- Stars will be inserted here -->
+                                        </div>
+                                        <span id="previewAvailability" class="text-xs px-2 py-1 rounded-full"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compact Stats -->
+                <div class="mt-4 pt-4 border-t border-primary-200">
+                    <h3 class="text-sm font-medium text-primary-700 mb-3">Statistics</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="text-center p-2 bg-primary-50 rounded">
+                            <p class="text-lg font-semibold text-primary-900" id="totalProducts">0</p>
+                            <p class="text-xs text-primary-600">Products</p>
+                        </div>
+                        <div class="text-center p-2 bg-success-50 rounded">
+                            <p class="text-lg font-semibold text-success-600" id="priceDrops">0</p>
+                            <p class="text-xs text-success-600">Drops Today</p>
+                        </div>
+                        <div class="text-center p-2 bg-warning-50 rounded">
+                            <p class="text-lg font-semibold text-warning-600" id="activeAlerts">0</p>
+                            <p class="text-xs text-warning-600">Alerts</p>
+                        </div>
+                        <div class="text-center p-2 bg-accent-50 rounded">
+                            <p class="text-lg font-semibold text-accent-600" id="successRate">98%</p>
+                            <p class="text-xs text-accent-600">Success</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Results -->
+    <div class="lg:col-span-3">
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="card">
+                <div class="p-6">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="w-12 h-12 bg-success-50 rounded-full flex items-center justify-center mb-3">
+                            <i class="fas fa-spinner fa-spin text-success-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-primary-900 mb-1">Tracking Product...</h3>
+                        <p class="text-sm text-primary-600">Please wait while we analyze the product</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Result -->
+        <div id="productResult" class="hidden mb-4">
+            <!-- Product details will be inserted here -->
+        </div>
+
+        <!-- Tracked Products Table -->
+        <div class="card">
+            <div class="p-4 border-b border-primary-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-primary-900 flex items-center">
+                        <i class="fas fa-list text-success-500 mr-2"></i>
+                        Tracked Products
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <select class="input text-sm w-24">
+                            <option>All</option>
+                            <option>Active</option>
+                            <option>Alert</option>
+                        </select>
+                        <button onclick="exportProducts()" class="text-sm text-success-600 hover:text-success-700 font-medium">
+                            <i class="fas fa-download mr-1"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-primary-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Product</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Current Price</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Target Price</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Change</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Last Updated</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody" class="bg-white divide-y divide-primary-200">
+                        <!-- Products will be inserted here -->
+                    </tbody>
+                </table>
+                <div id="noProducts" class="text-center py-8">
+                    <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-box-open text-primary-400 text-lg"></i>
+                    </div>
+                    <p class="text-sm text-primary-600">No products tracked yet</p>
+                    <p class="text-xs text-primary-500 mt-1">Add a product URL to start tracking</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 transform transition-all">
+        <div class="flex items-center justify-center w-12 h-12 bg-success-50 rounded-full mx-auto mb-4">
+            <i class="fas fa-check text-success-600 text-xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-primary-900 mb-2">Product Added Successfully!</h3>
+        <p class="text-sm text-primary-600 text-center mb-4">We'll start tracking prices and send you alerts when there are changes.</p>
+        <button onclick="closeModal('successModal')" class="btn-primary w-full">
+            Got it
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let priceChart = null;
+let currentProductData = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    setupEventListeners();
+    loadStatistics();
+    loadProducts();
+    
+    // Auto-refresh products every 30 seconds
+    setInterval(loadProducts, 30000);
+});
+
+function setupEventListeners() {
+    const form = document.getElementById('priceTrackerForm');
+    const fetchBtn = document.getElementById('fetchBtn');
+    
+    if (form) {
+        form.addEventListener('submit', handlePriceTracking);
+    }
+    
+    if (fetchBtn) {
+        fetchBtn.addEventListener('click', handleFetchProduct);
+    }
+}
+
+async function handleFetchProduct() {
+    const url = document.getElementById('productUrl').value;
+    const fetchBtn = document.getElementById('fetchBtn');
+    
+    if (!url) {
+        showError('Please enter a product URL');
+        return;
+    }
+    
+    // Validate URL
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        showError('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+    
+    // Check supported sites
+    const supportedSites = ['amazon', 'flipkart', 'ebay'];
+    if (!supportedSites.some(site => url.toLowerCase().includes(site))) {
+        showError('Unsupported website. Please use Amazon, Flipkart, or eBay');
+        return;
+    }
+    
+    // Show loading state
+    fetchBtn.disabled = true;
+    fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Fetching...';
+    
+    try {
+        const response = await fetch('/price-tracker/fetch', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `url=${encodeURIComponent(url)}`
+        });
+        
+        const result = await response.json();
+        console.log('Full API Response:', result);
+        
+        if (!result.success || result.error) {
+            if (result.error === 'blocked') {
+                showToast(
+                    '⚠️ Flipkart blocked the request. ' +
+                    'Will retry automatically in 5 mins.',
+                    'warning'
+                );
+            } else {
+                showError(result.error?.message || result.error || 'An error occurred');
+            }
+        } else {
+            // Handle both direct product data and wrapped product data
+            let productData = result.data?.product || result.data || result;
+            console.log('Product data before URL fix:', productData);
+            
+            // Ensure the product data has the URL
+            if (!productData.url) {
+                productData.url = url;
+            }
+            
+            console.log('Final product data:', productData);
+            showProductPreview(productData);
+            currentProductData = productData;
+            document.getElementById('trackBtn').disabled = false;
+        }
+    } catch (error) {
+        showError('Network error. Please try again.');
+    } finally {
+        fetchBtn.disabled = false;
+        fetchBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Fetch Details';
+    }
+}
+
+function showProductPreview(product) {
+    console.log('showProductPreview called with:', product);
+    
+    const preview = document.getElementById('productPreview');
+    const image = document.getElementById('previewImage');
+    const name = document.getElementById('previewName');
+    const price = document.getElementById('previewPrice');
+    const originalPrice = document.getElementById('previewOriginalPrice');
+    const rating = document.getElementById('previewRating');
+    const availability = document.getElementById('previewAvailability');
+    
+    // Set image - use real image if available, otherwise placeholder
+    if (product.image_url && !product.is_demo) {
+        image.src = product.image_url;
+        console.log('Using real image:', product.image_url);
+    } else {
+        image.src = 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=Product';
+        console.log('Using placeholder image');
+    }
+    
+    // Set name - use real name if available and not demo
+    if (product.name && !product.is_demo) {
+        name.textContent = product.name;
+        console.log('Using real name:', product.name);
+    } else if (product.is_demo) {
+        // For demo products, show a more descriptive name
+        name.textContent = `${product.name} (Demo)`;
+        console.log('Using demo name with suffix:', product.name);
+    } else {
+        name.textContent = product.name || 'Unknown Product';
+        console.log('Using fallback name:', product.name);
+    }
+    
+    // Set prices
+    price.textContent = `$${product.price}`;
+    if (product.original_price && product.original_price > product.price) {
+        originalPrice.textContent = `$${product.original_price}`;
+        originalPrice.style.display = 'inline';
+    } else {
+        originalPrice.style.display = 'none';
+    }
+    
+    // Set rating
+    if (product.rating) {
+        const stars = generateStars(product.rating);
+        rating.innerHTML = stars + ` ${product.rating}`;
+    } else {
+        rating.innerHTML = '<i class="fas fa-star text-gray-300"></i> No rating';
+    }
+    
+    // Set availability
+    const availabilityClass = product.availability === 'In Stock' ? 
+        'bg-success-100 text-success-700' : 'bg-danger-100 text-danger-700';
+    availability.className = `text-xs px-2 py-1 rounded-full ${availabilityClass}`;
+    availability.textContent = product.availability || 'Unknown';
+    
+    // Show preview
+    console.log('Showing preview element');
+    preview.classList.remove('hidden');
+}
+
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    let stars = '';
+    
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    
+    if (hasHalfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    
+    return stars;
+}
+
+async function loadStatistics() {
+    try {
+        const response = await fetch('/price-tracker/statistics');
+        const stats = await response.json();
+        
+        document.getElementById('totalProducts').textContent = stats.total_products;
+        document.getElementById('priceDrops').textContent = stats.price_drops_today;
+        document.getElementById('activeAlerts').textContent = stats.active_alerts;
+        
+        // Add additional stats if needed
+        if (document.getElementById('totalSavings')) {
+            document.getElementById('totalSavings').textContent = `$${stats.total_savings}`;
+        }
+        
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+    }
+}
+
+async function loadProducts() {
+    try {
+        const response = await fetch('/price-tracker/products');
+        const data = await response.json();
+        
+        const tableBody = document.getElementById('productsTableBody');
+        const noProducts = document.getElementById('noProducts');
+        
+        if (data.products && data.products.length > 0) {
+            tableBody.innerHTML = data.products.map(product => `
+                <tr class="hover:bg-primary-50">
+                    <td class="px-4 py-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <img src="${product.image_url || 'https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=P'}" 
+                                 alt="${product.name}" 
+                                 class="w-10 h-10 object-cover rounded-lg">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-primary-900 truncate">${product.name}</p>
+                                <p class="text-xs text-primary-500">${product.platform || 'Unknown'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-primary-900">$${product.current_price}</span>
+                            ${product.original_price && product.original_price > product.current_price ? 
+                                `<span class="text-xs text-primary-500 line-through">$${product.original_price}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        ${product.target_price ? 
+                            `<span class="font-medium text-accent-600">$${product.target_price}</span>` : 
+                            '<span class="text-primary-400">Not set</span>'}
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        <div class="flex items-center gap-1">
+                            ${product.price_change ? 
+                                (product.price_change > 0 ? 
+                                    '<i class="fas fa-arrow-up text-danger-500"></i>' : 
+                                    '<i class="fas fa-arrow-down text-success-500"></i>') : 
+                                '<i class="fas fa-minus text-gray-400"></i>'}
+                            <span class="${product.price_change ? 
+                                (product.price_change > 0 ? 'text-danger-600' : 'text-success-600') : 
+                                'text-gray-500'}">
+                                ${product.price_change ? `${Math.abs(product.price_change).toFixed(1)}%` : '0%'}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 text-sm text-primary-600">
+                        ${formatDate(product.last_updated)}
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(product.status)}">
+                            ${getStatusIcon(product.status)} ${product.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        <button onclick="viewProductDetails(${product.id})" class="text-primary-600 hover:text-primary-900 mr-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="setPriceAlert(${product.id}, '${product.product_name}', ${product.current_price || 0})" class="text-warning-600 hover:text-warning-900 mr-2" title="Set Price Alert">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button onclick="deleteProduct(${product.id})" class="text-danger-600 hover:text-danger-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            if (noProducts) noProducts.classList.add('hidden');
+        } else {
+            if (noProducts) noProducts.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+    function getStatusClass(status) {
+    switch(status) {
+        case 'Tracking': return 'bg-primary-100 text-primary-700';
+        case 'Price Drop': return 'bg-success-100 text-success-700';
+        case 'Target Hit': return 'bg-warning-100 text-warning-700';
+        default: return 'bg-gray-100 text-gray-700';
+    }
+}
+
+function getStatusIcon(status) {
+    switch(status) {
+        case 'Tracking': return '<i class="fas fa-chart-line mr-1"></i>';
+        case 'Price Drop': return '<i class="fas fa-arrow-down mr-1"></i>';
+        case 'Target Hit': return '<i class="fas fa-bullseye mr-1"></i>';
+        default: return '<i class="fas fa-question mr-1"></i>';
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+        if (diffHours === 0) {
+            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+            return diffMinutes <= 1 ? 'Just now' : `${diffMinutes}m ago`;
+        }
+        return `${diffHours}h ago`;
+    } else if (diffDays === 1) {
+        return 'Yesterday';
+    } else if (diffDays < 7) {
+        return `${diffDays}d ago`;
+    } else {
+        return date.toLocaleDateString();
+    }
+}
+
+function viewProductDetails(productId) {
+    window.location.href = `/product/${productId}`;
+}
+
+async function deleteProduct(productId) {
+  if (!confirm('Delete this product?')) return;
+  
+  console.log('Deleting:', productId);
+  
+  try {
+    const res = await fetch(
+      `/price-tracker/delete/${productId}`,
+      { method: 'POST' }
+    );
+    const text = await res.text();
+    console.log('Delete response:', text);
+    
+    const data = JSON.parse(text);
+    if (data.success) {
+      showToast('Deleted!', 'success');
+      loadProducts();
+      loadStatistics();
+    } else {
+      showToast('Failed: ' + data.error, 'error');
+    }
+  } catch(e) {
+    console.error('Delete error:', e);
+  }
+}
+
+async function handlePriceTracking(e) {
+    e.preventDefault();
+    
+    if (!currentProductData) {
+        showError('Please fetch product details first');
+        return;
+    }
+    
+    const targetPrice = document.getElementById('targetPrice').value;
+    const email = document.getElementById('notificationEmail').value;
+    const submitBtn = document.getElementById('trackBtn');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+    
+    try {
+        // Ensure the product data has the URL
+        if (!currentProductData.url) {
+            showError('Product data is missing URL. Please fetch product details again.');
+            return;
+        }
+        
+        const response = await fetch('/price-tracker/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product: currentProductData,
+                target_price: targetPrice,
+                email: email
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success || result.error) {
+            if (result.error === 'blocked') {
+                showToast(
+                    '⚠️ Flipkart blocked the request. ' +
+                    'Will retry automatically in 5 mins.',
+                    'warning'
+                );
+            } else {
+                showError(result.error?.message || result.error || 'An error occurred');
+            }
+        } else {
+            showSuccessModal();
+            loadStatistics();
+            loadProducts();
+            
+            // Reset form
+            document.getElementById('priceTrackerForm').reset();
+            document.getElementById('productPreview').classList.add('hidden');
+            document.getElementById('trackBtn').disabled = true;
+            currentProductData = null;
+        }
+    } catch (error) {
+        showError('Network error. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Add to Tracker';
+    }
+}
+
+function showSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function showError(message) {
+    // Create error toast
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'fixed top-4 right-4 bg-danger-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    errorDiv.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+function exportProducts() {
+    const format = prompt('Export format (csv/json):', 'csv');
+    if (format && ['csv', 'json'].includes(format.toLowerCase())) {
+        window.location.href = `/api/price-tracker/export?format=${format.toLowerCase()}`;
+    } else if (format) {
+        showError('Invalid format. Please choose csv or json.');
+    }
+}
+
+async function addProduct() {
+  const url = document.getElementById('productUrl').value.trim();
+  const targetPrice = document.getElementById('targetPrice').value.trim() || '';
+  const alertEmail = document.getElementById('notificationEmail').value.trim() || '';
+  
+    
+  if (!url) {
+    showToast('Please enter a product URL', 'error');
+    return;
+  }
+  
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    showToast('Please enter a valid URL starting with http:// or https://', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('add-btn');
+  
+  // Loading animation
+  btn.innerHTML = '⟳';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  btn.style.transform = 'scale(0.95)';
+  
+  // Show loading text below form
+  let loadingText = document.getElementById('loading-text');
+  if (!loadingText) {
+    loadingText = document.createElement('div');
+    loadingText.id = 'loading-text';
+    loadingText.className = 'text-sm text-primary-600 mt-2 text-center';
+    loadingText.innerHTML = 'Fetching product info...';
+    document.getElementById('priceTrackerForm').appendChild(loadingText);
+  }
+  
+  console.log('[ADD] Adding product:', url);
+  console.log('[ADD] Target Price:', targetPrice);
+  console.log('[ADD] Alert Email:', alertEmail);
+  
+  try {
+    const res = await fetch('/price-tracker/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        url: url,
+        product_name: '',  // Will be scraped from URL
+        frequency: 'daily',  // Default frequency
+        alert_email: alertEmail
+      })
+    });
+    
+    console.log('[ADD] Response status:', res.status);
+    const data = await res.json();
+    console.log('[ADD] Response:', data);
+    
+    if (data.success) {
+      // Success animation
+      btn.innerHTML = '✓';
+      btn.style.background = '#22C55E';
+      btn.style.opacity = '1';
+      
+      // Show success message
+      showToast(data.message || 'Product added successfully!', 'success');
+      
+      // Clear inputs
+      document.getElementById('productUrl').value = '';
+      document.getElementById('targetPrice').value = '';
+      document.getElementById('notificationEmail').value = '';
+      
+      // Reload products
+      loadProducts();
+      loadStatistics();
+      
+      // Reset button after delay
+      setTimeout(() => {
+        btn.innerHTML = '+';
+        btn.style.background = '';
+        btn.disabled = false;
+        btn.style.transform = 'scale(1)';
+        if (loadingText) loadingText.remove();
+      }, 2000);
+      
+    } else {
+      // Show error but still reset button
+      showToast(data.error || 'Failed to add product', 'error');
+      btn.innerHTML = '+';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.transform = 'scale(1)';
+      if (loadingText) loadingText.remove();
+    }
+    
+  } catch(e) {
+    console.error('[ADD ERROR]', e);
+    showToast('Network error: ' + e.message, 'error');
+    btn.innerHTML = '+';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.transform = 'scale(1)';
+    if (loadingText) loadingText.remove();
+  }
+}
+
+function setPriceAlert(productId, productName, currentPrice) {
+  const email = prompt('Price Alert Feature Coming Soon!\n\n' +
+                      `Product: ${productName}\n` +
+                      `Current Price: ₹${currentPrice}\n\n` +
+                      'Enter your email to get notified when price changes:');
+  
+  if (email) {
+    showToast(`Price alert feature coming soon! We'll notify you at ${email} when price changes.`, 'info');
+    console.log('[ALERT] Product ID:', productId, 'Email:', email, 'Current Price:', currentPrice);
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,964 @@
+{% extends "base.html" %}
+
+{% block title %}Data Scraper - Smart Web Scraper Suite{% endblock %}
+
+{% block page_title %}Data Scraper{% endblock %}
+
+{% block content %}
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column - Input Form -->
+    <div class="lg:col-span-1">
+        <div class="card">
+            <div class="p-4 border-b border-primary-200">
+                <h2 class="text-lg font-semibold text-primary-900 flex items-center">
+                    <i class="fas fa-database text-warning-500 mr-2"></i>
+                    Scrape Data
+                </h2>
+            </div>
+            <div class="p-4">
+                <form id="dataScraperForm" class="space-y-4">
+                    <div>
+                        <label for="scrapeUrl" class="block text-sm font-medium text-primary-700 mb-1">Website URL</label>
+                        <input type="url" id="scrapeUrl" name="url" 
+                               placeholder="https://example.com/article" 
+                               class="input w-full" required>
+                        <p class="text-xs text-primary-500 mt-1">
+                            Enter the URL of the page containing data you want to scrape
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-primary-700 mb-2">Scraping Type</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="radio" class="hidden" name="scrapeType" id="typeText" value="text" checked>
+                            <label for="typeText" class="btn-radio-option active">
+                                <i class="fas fa-file-alt mr-1"></i>Text
+                            </label>
+                            
+                            <input type="radio" class="hidden" name="scrapeType" id="typeImages" value="images">
+                            <label for="typeImages" class="btn-radio-option">
+                                <i class="fas fa-image mr-1"></i>Images
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="useDynamic" class="mr-2">
+                            <span class="text-sm text-primary-700">
+                                <i class="fas fa-globe mr-1"></i>
+                                Use Dynamic Scraping (for JavaScript-heavy sites)
+                            </span>
+                        </label>
+                        <p class="text-xs text-primary-500 mt-1">
+                            Enable for modern websites with dynamic content (slower but more comprehensive)
+                        </p>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full" id="scrapeBtn">
+                        <i class="fas fa-download mr-2"></i>
+                        Start Scraping
+                    </button>
+                </form>
+                
+                <!-- Loading State -->
+                <div id="loadingSpinner" class="hidden text-center mt-4">
+                    <div class="inline-flex items-center">
+                        <i class="fas fa-spinner fa-spin text-warning-500 text-xl mr-2"></i>
+                        <span class="text-primary-600">Scraping data...</span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4">
+                        <div class="w-full bg-primary-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-warning-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText" class="text-xs text-primary-500 mt-1">Initializing...</p>
+                    </div>
+                </div>
+                
+                <!-- Quick Tips -->
+                <div class="mt-6 p-4 bg-primary-50 rounded-lg">
+                    <h3 class="text-sm font-semibold text-primary-900 mb-2">
+                        <i class="fas fa-lightbulb text-warning-500 mr-1"></i>
+                        Scraping Tips
+                    </h3>
+                    <ul class="text-xs text-primary-600 space-y-1">
+                        <li>• Text scraping extracts all readable content</li>
+                        <li>• Image scraping downloads all images</li>
+                        <li>• Data is saved in the /data directory</li>
+                        <li>• Large sites may take longer to process</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column - Results -->
+    <div class="lg:col-span-2">
+        <!-- Results Section -->
+        <div id="scrapingResults" class="hidden">
+            <!-- Logs and Warnings -->
+            <div id="logsContainer" class="mb-6"></div>
+            
+            <!-- Sources Info (for crawled pages) -->
+            <div id="sourcesContainer" class="mb-6"></div>
+            <!-- Text Results -->
+            <div id="textResults" class="hidden">
+                <div class="card mb-6">
+                    <div class="p-4 border-b border-primary-200">
+                        <h3 class="text-lg font-semibold text-primary-900">Text Data</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="text-md font-medium text-primary-700 mb-2">Statistics</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="wordCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Words</div>
+                                </div>
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="charCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Characters</div>
+                                </div>
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="lineCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Lines</div>
+                                </div>
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="paragraphCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Paragraphs</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-md font-medium text-primary-700 mb-2">Title</h4>
+                                <div id="pageTitle" class="bg-primary-50 p-3 rounded-lg text-sm text-primary-800"></div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-md font-medium text-primary-700 mb-2">Headings</h4>
+                                <div id="headingsList" class="bg-primary-50 p-3 rounded-lg text-sm text-primary-700"></div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-md font-medium text-primary-700 mb-2">Paragraphs</h4>
+                                <div id="paragraphsList" class="bg-primary-50 p-4 rounded-lg max-h-96 overflow-y-auto text-sm text-primary-700 space-y-3"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button onclick="downloadTextData()" class="btn-success">
+                                <i class="fas fa-download mr-1"></i>Download Text
+                            </button>
+                            <button onclick="copyTextData()" class="btn-secondary">
+                                <i class="fas fa-copy mr-1"></i>Copy to Clipboard
+                            </button>
+                            <button onclick="downloadJsonData()" class="btn-secondary">
+                                <i class="fas fa-file-code mr-1"></i>Export JSON
+                            </button>
+                            <button onclick="downloadCsvData()" class="btn-secondary">
+                                <i class="fas fa-file-csv mr-1"></i>Export CSV
+                            </button>
+                            <button onclick="exportPDF()" style="
+                                padding: 8px 14px;
+                                background: rgba(244,63,94,0.1);
+                                color: #F43F5E;
+                                border: 1px solid rgba(244,63,94,0.3);
+                                border-radius: 6px;
+                                font-size: 0.8rem;
+                                cursor: pointer;">
+                                ↓ Export PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Image Results -->
+            <div id="imageResults" class="hidden">
+                <div class="card mb-6">
+                    <div class="p-4 border-b border-primary-200">
+                        <h3 class="text-lg font-semibold text-primary-900">Images</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="text-md font-medium text-primary-700 mb-2">Statistics</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="imageCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Images Found</div>
+                                </div>
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="downloadedCount" class="text-xl font-bold text-primary-900">0</div>
+                                    <div class="text-primary-600">Downloaded</div>
+                                </div>
+                                <div class="text-center p-3 bg-primary-50 rounded">
+                                    <div id="totalSize" class="text-xl font-bold text-primary-900">0 MB</div>
+                                    <div class="text-primary-600">Total Size</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-md font-medium text-primary-700 mb-2">Downloaded Images</h4>
+                            <div id="imageGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <!-- Images will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="downloadAllImages()" class="btn-success">
+                                <i class="fas fa-download mr-1"></i>Download All as ZIP
+                            </button>
+                            <button onclick="openImageFolder()" class="btn-secondary">
+                                <i class="fas fa-folder-open mr-1"></i>Open Folder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Initial State -->
+        <div id="initialState" class="card">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-warning-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-database text-warning-500 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-primary-900 mb-2">Ready to Scrape</h3>
+                <p class="text-sm text-primary-600 mb-4">Enter a website URL to start scraping text or image data</p>
+                <div class="grid grid-cols-2 gap-4 text-xs text-primary-500">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-file-alt text-warning-500 mr-1"></i>
+                        Text Content
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-image text-warning-500 mr-1"></i>
+                        Images
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-radio-option {
+    padding: 0.5rem 1rem;
+    text-align: center;
+    border: 1px solid rgb(252 211 77);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.btn-radio-option:hover {
+    background-color: rgb(254 252 232);
+    border-color: rgb(251 191 36);
+}
+.btn-radio-option.active {
+    background-color: rgb(234 179 8);
+    color: white;
+    border-color: rgb(234 179 8);
+}
+input[type="radio"]:checked + .btn-radio-option {
+    background-color: rgb(234 179 8);
+    color: white;
+    border-color: rgb(234 179 8);
+}
+</style>
+
+<script>
+let scrapedData = null;
+let progressInterval = null;
+let loadingWatchdog = null;
+
+// Radio button styling
+document.querySelectorAll('input[name="scrapeType"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('.btn-radio-option').forEach(label => {
+            label.classList.remove('active');
+        });
+        this.nextElementSibling.classList.add('active');
+    });
+});
+
+document.getElementById('dataScraperForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const url = document.getElementById('scrapeUrl').value;
+    const scrapeType = document.querySelector('input[name="scrapeType"]:checked').value;
+    const scrapeBtn = document.getElementById('scrapeBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const initialState = document.getElementById('initialState');
+    const scrapingResults = document.getElementById('scrapingResults');
+    
+    if (!url) {
+        showError('Please enter a website URL');
+        return;
+    }
+    
+    // Validate URL
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        showError('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+    
+    // Show loading state
+    scrapeBtn.disabled = true;
+    scrapeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scraping...';
+    loadingSpinner.classList.remove('hidden');
+
+    if (loadingWatchdog) {
+        clearTimeout(loadingWatchdog);
+        loadingWatchdog = null;
+    }
+    loadingWatchdog = setTimeout(() => {
+        showError('Scraping is taking too long. The website may be blocking automated access. Try enabling Dynamic Scraping or test with a different URL.');
+        setProgressStage('Timed out');
+        scrapeBtn.disabled = false;
+        scrapeBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Start Scraping';
+        loadingSpinner.classList.add('hidden');
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }, 65000);
+    
+    // Simulate progress
+    simulateProgress();
+    setProgressStage('Fetching page...');
+    
+    try {
+        const controller = new AbortController();
+        const timeoutMs = 60000; // strong client-side timeout (60s)
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        const response = await fetch('/data-scraper/scrape', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                url: url,
+                scrape_type: scrapeType,
+                use_playwright: document.getElementById('useDynamic').checked
+            }),
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        setProgressStage('Parsing content...');
+        let result;
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+        
+        try {
+            result = await response.json();
+        } catch (parseErr) {
+            const raw = await response.text().catch(() => '');
+            throw new Error('Failed to parse server response. ' + (raw ? ('Response: ' + raw.slice(0, 300)) : ''));
+        }
+
+        if (result.success === false) {
+            // Backend returned an error
+            showError(result.error || 'Scraping failed');
+            setProgressStage('Failed');
+            return;
+        }
+
+        // Clear loading
+        loadingSpinner.classList.add('hidden');
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+
+        // Display results
+        const payload = result.data || result.content || result;
+
+        scrapedData = payload;
+        window._lastScrapeData = payload;
+        showScrapingResults(payload);
+        showSuccessModal(); // Add success notification
+        setProgressStage('Completed');
+    } catch (error) {
+        console.error('Fetch Error:', error); // Debug log
+        if (error && error.name === 'AbortError') {
+            showError('Request timed out. Site may be too slow.');
+            setProgressStage('Timed out');
+        } else {
+            showError('Network error: ' + error.message);
+            setProgressStage('Failed');
+        }
+    } finally {
+        if (loadingWatchdog) {
+            clearTimeout(loadingWatchdog);
+            loadingWatchdog = null;
+        }
+        scrapeBtn.disabled = false;
+        scrapeBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Start Scraping';
+        loadingSpinner.classList.add('hidden');
+
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }
+});
+
+function simulateProgress() {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    let progress = 0;
+
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+
+    progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        
+        progressBar.style.width = progress + '%';
+        
+        if (progress < 30) {
+            progressText.textContent = 'Connecting to website...';
+        } else if (progress < 60) {
+            progressText.textContent = 'Extracting data...';
+        } else if (progress < 90) {
+            progressText.textContent = 'Processing results...';
+        }
+        
+        if (progress >= 90) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+    }, 200);
+}
+
+function showScrapingResults(data) {
+    console.log('Showing results for:', data); // Debug log
+    console.log('Data type:', data.type); // Debug log
+    
+    const initialState = document.getElementById('initialState');
+    const scrapingResults = document.getElementById('scrapingResults');
+    const textResults = document.getElementById('textResults');
+    const imageResults = document.getElementById('imageResults');
+    
+    // Hide initial state
+    if (initialState) initialState.classList.add('hidden');
+    if (scrapingResults) scrapingResults.classList.remove('hidden');
+    
+    // Show logs and warnings if available
+    if (data.logs || data.warnings) {
+        showLogsAndWarnings(data.logs || [], data.warnings || []);
+    }
+    
+    // Show appropriate results based on type
+    if (data.type === 'text') {
+        console.log('Displaying text results'); // Debug log
+        if (textResults) textResults.classList.remove('hidden');
+        if (imageResults) imageResults.classList.add('hidden');
+        displayTextResults(data);
+        
+        // Show crawled pages info if available
+        if (data.crawled_pages) {
+            showCrawledPagesInfo(data);
+        }
+    } else if (data.type === 'images') {
+        console.log('Displaying image results'); // Debug log
+        if (textResults) textResults.classList.add('hidden');
+        if (imageResults) imageResults.classList.remove('hidden');
+        displayImageResults(data);
+    } else if (data.type === 'both') {
+        console.log('Displaying both text and image results'); // Debug log
+        if (textResults) textResults.classList.remove('hidden');
+        if (imageResults) imageResults.classList.remove('hidden');
+        displayTextResults(data);
+        displayImageResults(data);
+        
+        // Show crawled pages info if available
+        if (data.crawled_pages) {
+            showCrawledPagesInfo(data);
+        }
+    } else {
+        console.log('Unknown type, defaulting to text results'); // Debug log
+        if (textResults) textResults.classList.remove('hidden');
+        if (imageResults) imageResults.classList.add('hidden');
+        displayTextResults(data);
+    }
+}
+
+function showLogsAndWarnings(logs, warnings) {
+    const logsContainer = document.getElementById('logsContainer');
+    if (!logsContainer) return;
+    
+    logsContainer.innerHTML = '';
+    
+    // Show warnings first
+    if (warnings.length > 0) {
+        const warningsDiv = document.createElement('div');
+        warningsDiv.className = 'mb-3 p-3 bg-warning-50 border border-warning-200 rounded-lg';
+        warningsDiv.innerHTML = `
+            <h4 class="text-sm font-semibold text-warning-800 mb-2">
+                <i class="fas fa-exclamation-triangle mr-1"></i>Warnings
+            </h4>
+            <ul class="text-sm text-warning-700 space-y-1">
+                ${warnings.map(w => `<li>• ${w}</li>`).join('')}
+            </ul>
+        `;
+        logsContainer.appendChild(warningsDiv);
+    }
+    
+    // Show logs
+    if (logs.length > 0) {
+        const logsDiv = document.createElement('div');
+        logsDiv.className = 'p-3 bg-primary-50 border border-primary-200 rounded-lg';
+        logsDiv.innerHTML = `
+            <h4 class="text-sm font-semibold text-primary-800 mb-2">
+                <i class="fas fa-info-circle mr-1"></i>Scraping Logs
+            </h4>
+            <ul class="text-sm text-primary-700 space-y-1">
+                ${logs.map(log => `<li>• ${log}</li>`).join('')}
+            </ul>
+        `;
+        logsContainer.appendChild(logsDiv);
+    }
+}
+
+function showCrawledPagesInfo(data) {
+    const sourcesContainer = document.getElementById('sourcesContainer');
+    if (!sourcesContainer || !data.sources) return;
+    
+    sourcesContainer.innerHTML = `
+        <div class="mt-4 p-3 bg-success-50 border border-success-200 rounded-lg">
+            <h4 class="text-sm font-semibold text-success-800 mb-2">
+                <i class="fas fa-globe mr-1"></i>Crawled ${data.crawled_pages} Pages
+            </h4>
+            <div class="space-y-1">
+                ${data.sources.map(source => `
+                    <div class="text-sm text-success-700">
+                        <strong>${source.title}</strong> - ${source.word_count} words
+                        <br><span class="text-xs text-success-600">${source.url}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function displayTextResults(data) {
+    // Service payload for text scraping:
+    // data = { type: 'text', success: true, content: { text, stats: {...}, ... }, ... }
+    const content = data?.content || data || {};
+    const stats = content?.stats || data?.stats || {};
+
+    const wordCountEl = document.getElementById('wordCount');
+    const charCountEl = document.getElementById('charCount');
+    const lineCountEl = document.getElementById('lineCount');
+    const paragraphCountEl = document.getElementById('paragraphCount');
+    const pageTitleEl = document.getElementById('pageTitle');
+    const headingsListEl = document.getElementById('headingsList');
+    const paragraphsListEl = document.getElementById('paragraphsList');
+
+    if (wordCountEl) wordCountEl.textContent = stats.word_count ?? content.word_count ?? 0;
+    if (charCountEl) charCountEl.textContent = stats.char_count ?? content.char_count ?? 0;
+    if (lineCountEl) lineCountEl.textContent = stats.line_count ?? content.line_count ?? 0;
+    if (paragraphCountEl) paragraphCountEl.textContent = stats.paragraph_count ?? content.paragraph_count ?? 0;
+
+    if (pageTitleEl) {
+        pageTitleEl.textContent = content.title || '';
+    }
+
+    if (headingsListEl) {
+        const headings = Array.isArray(content.headings) ? content.headings : [];
+        headingsListEl.innerHTML = headings.length
+            ? `<ul class="list-disc list-inside space-y-1">${headings.map(h => `<li>${escapeHtml(h)}</li>`).join('')}</ul>`
+            : '<div class="text-primary-500">No headings found.</div>';
+    }
+
+    if (paragraphsListEl) {
+        const paragraphs = Array.isArray(content.paragraphs) ? content.paragraphs : [];
+        paragraphsListEl.innerHTML = paragraphs.length
+            ? paragraphs.map(p => `<p class="leading-relaxed">${escapeHtml(p)}</p>`).join('')
+            : '<div class="text-primary-500">No paragraphs found.</div>';
+    }
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+}
+
+function displayImageResults(data) {
+    console.log('Displaying image results with data:', data); // Debug log
+    
+    // Handle different data structures
+    let imageData = {};
+    if (data.images) {
+        // Direct images structure
+        imageData = data.images;
+    } else if (data.total_found !== undefined) {
+        // Image data is directly in data object
+        imageData = data;
+    } else {
+        // Fallback
+        imageData = data;
+    }
+    
+    console.log('Processed image data:', imageData); // Debug log
+    
+    // Update statistics
+    const totalImagesEl = document.getElementById('totalImages');
+    const downloadedImagesEl = document.getElementById('downloadedImages');
+    const totalSizeEl = document.getElementById('totalSize');
+    const imageGridEl = document.getElementById('imageGrid');
+    
+    if (totalImagesEl) totalImagesEl.textContent = imageData.total_found || 0;
+    if (downloadedImagesEl) downloadedImagesEl.textContent = imageData.downloaded || 0;
+    if (totalSizeEl) totalSizeEl.textContent = (imageData.total_size_mb || 0).toFixed(2) + ' MB';
+    
+    // Display images
+    if (imageGridEl && imageData.downloaded_images) {
+        imageGridEl.innerHTML = imageData.downloaded_images.map(img => `
+            <div class="relative group">
+                <img src="${img.data_url}" alt="${img.alt || 'Scraped image'}" 
+                     class="w-full h-48 object-cover rounded-lg">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity rounded-lg">
+                    <div class="absolute bottom-2 left-2 right-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p class="text-xs truncate">${img.filename}</p>
+                        <p class="text-xs">${(img.size_bytes / 1024).toFixed(1)} KB</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else if (imageGridEl) {
+        imageGridEl.innerHTML = '<p class="text-gray-500 col-span-full">No images found or downloaded.</p>';
+    }
+    
+    console.log('Image results displayed'); // Debug log
+}
+
+function showCrawledPagesInfo(data) {
+    const crawledInfo = document.getElementById('crawledInfo');
+    if (!crawledInfo) return;
+    
+    if (data.crawled_pages && data.sources) {
+        crawledInfo.innerHTML = `
+            <div class="mb-4 p-3 bg-info-50 border border-info-200 rounded-lg">
+                <h4 class="text-sm font-semibold text-info-800 mb-2">
+                    <i class="fas fa-globe mr-1"></i>Crawled ${data.crawled_pages} Pages
+                </h4>
+                <div class="space-y-2">
+                    ${data.sources.map(source => `
+                        <div class="text-xs text-info-700">
+                            <strong>${source.title}</strong><br>
+                            <span class="text-info-600">${source.url}</span><br>
+                            <span class="text-info-500">${source.word_count} words</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        crawledInfo.classList.remove('hidden');
+    }
+}
+
+function downloadTextData() {
+    const content = scrapedData?.content;
+    if (!content) return;
+
+    const text = content.text || '';
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'scraped_text.txt';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function copyTextData() {
+    const content = scrapedData?.content;
+    if (!content) return;
+
+    const text = content.text || '';
+    navigator.clipboard.writeText(text).then(() => {
+        showError('Text copied to clipboard!');
+    });
+}
+
+function downloadJsonData() {
+    const content = scrapedData?.content;
+    if (!content) return;
+
+    const payload = {
+        url: content.url,
+        title: content.title,
+        headings: content.headings || [],
+        paragraphs: content.paragraphs || [],
+        stats: content.stats || {},
+        timestamp: content.timestamp,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'scraped_content.json';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function exportCSV() {
+  if (!window._lastScrapeData) return;
+  const data = window._lastScrapeData.content || window._lastScrapeData;
+  
+  let csv = '';
+  let stats = { headings: 0, paragraphs: 0, links: 0 };
+  
+  // Headings
+  if (data.headings && data.headings.length > 0) {
+    csv += 'HEADINGS\n';
+    csv += 'Level,Text\n';
+    data.headings.forEach(h => {
+      csv += `${h.level || '1'},"${(h.text || h).replace(/"/g,'""')}"\n`;
+      stats.headings++;
+    });
+    csv += '\n';
+  }
+  
+  // Paragraphs
+  if (data.paragraphs && data.paragraphs.length > 0) {
+    csv += 'PARAGRAPHS\n';
+    csv += 'Text\n';
+    data.paragraphs.forEach(p => {
+      csv += `"${p.replace(/"/g,'""')}"\n`;
+      stats.paragraphs++;
+    });
+    csv += '\n';
+  }
+  
+  // Links
+  if (data.links && data.links.length > 0) {
+    csv += 'LINKS\n';
+    csv += 'Text,URL\n';
+    data.links.forEach(l => {
+      csv += `"${(l.text || '').replace(/"/g,'""')}","${l.url || l}"\n`;
+      stats.links++;
+    });
+    csv += '\n';
+  }
+  
+  // Images
+  if (data.images && data.images.length > 0) {
+    csv += 'IMAGES\n';
+    csv += 'Alt Text,URL\n';
+    data.images.forEach(img => {
+      csv += `"${(img.alt||'').replace(/"/g,'""')}","${img.src}"\n`;
+    });
+    csv += '\n';
+  }
+  
+  // Emails
+  if (data.emails && data.emails.length > 0) {
+    csv += 'EMAILS\n';
+    csv += 'Email\n';
+    data.emails.forEach(e => {
+      csv += `${e}\n`;
+    });
+  }
+  
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const domain = window._lastScrapeData.url
+    .replace('https://','').replace('http://','')
+    .split('/')[0];
+  a.download = `scraped-${domain}-${Date.now()}.csv`;
+  a.click();
+  
+  // Show export stats
+  showToast(`Exported ${stats.headings} headings, ${stats.paragraphs} paragraphs, ${stats.links} links as CSV`, 'success');
+}
+
+function downloadCsvData() {
+    exportCSV(); // Keep existing function name for compatibility
+}
+
+function exportPDF() {
+  if (!window._lastScrapeData) return;
+  const data = window._lastScrapeData.content || window._lastScrapeData;
+  
+  // Load jsPDF
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  script.onload = function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Scraping Results', 105, 20, { align: 'center' });
+    
+    // Add URL
+    doc.setFontSize(10);
+    doc.text(`Source: ${window._lastScrapeData.url}`, 105, 30, { align: 'center' });
+    
+    let yPosition = 45;
+    let stats = { headings: 0, paragraphs: 0, links: 0 };
+    
+    // Add headings
+    if (data.headings && data.headings.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Headings', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(10);
+      data.headings.forEach(h => {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        const text = `${h.level || '1'}. ${h.text || h}`;
+        const lines = doc.splitTextToSize(text, 170);
+        lines.forEach(line => {
+          doc.text(line, 20, yPosition);
+          yPosition += 6;
+        });
+        stats.headings++;
+      });
+      yPosition += 10;
+    }
+    
+    // Add paragraphs
+    if (data.paragraphs && data.paragraphs.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Paragraphs', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(10);
+      data.paragraphs.forEach(p => {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        const lines = doc.splitTextToSize(p, 170);
+        lines.forEach(line => {
+          doc.text(line, 20, yPosition);
+          yPosition += 6;
+        });
+        stats.paragraphs++;
+      });
+      yPosition += 10;
+    }
+    
+    // Add links
+    if (data.links && data.links.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Links', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(10);
+      data.links.forEach(l => {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        const text = `${l.text || l}: ${l.url || l}`;
+        const lines = doc.splitTextToSize(text, 170);
+        lines.forEach(line => {
+          doc.text(line, 20, yPosition);
+          yPosition += 6;
+        });
+        stats.links++;
+      });
+    }
+    
+    // Add footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated by Smart Web Scraper Suite · Page ${i} of ${pageCount}`, 
+               105, 285, { align: 'center' });
+    }
+    
+    // Save PDF
+    const domain = window._lastScrapeData.url
+      .replace('https://','').replace('http://','')
+      .split('/')[0];
+    doc.save(`scraped-${domain}-${Date.now()}.pdf`);
+    
+    // Show export stats
+    showToast(`Exported ${stats.headings} headings, ${stats.paragraphs} paragraphs, ${stats.links} links as PDF`, 'success');
+  };
+  document.head.appendChild(script);
+}
+
+function downloadImage(filename) {
+    window.open(`/data/images/${filename}`, '_blank');
+}
+
+function downloadAllImages() {
+    showError('ZIP download feature coming soon!');
+}
+
+function openImageFolder() {
+    showError('Folder opening feature coming soon!');
+}
+
+function showError(message) {
+    // Show error in the right panel instead of top right red toast
+    const panel = document.getElementById('scrapingResults');
+    if (panel) {
+        panel.innerHTML = `
+            <div class="card">
+                <div style="text-align:center;padding:40px">
+                    <div style="font-size:48px">⚠️</div>
+                    <p style="color:#EF4444;font-size:1rem;
+                       font-weight:600;margin:12px 0 4px">
+                      Scraping Failed
+                    </p>
+                    <p style="color:#64748B;font-size:0.85rem">
+                      ${message}
+                    </p>
+                    <p style="color:#64748B;font-size:0.8rem;
+                       margin-top:12px">
+                      Try: Disable Dynamic Scraping for simple sites<br>
+                      Enable: Dynamic Scraping for JS-heavy sites
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function showSuccessModal() {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'fixed top-4 right-4 bg-success-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    successDiv.innerHTML = 
+        '<div class="flex items-center">' +
+            '<i class="fas fa-check-circle mr-2"></i>' +
+            '<span>Scraping completed successfully!</span>' +
+        '</div>';
+    document.body.appendChild(successDiv);
+    
+    setTimeout(function() {
+        successDiv.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}
